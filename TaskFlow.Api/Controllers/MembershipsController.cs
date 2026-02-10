@@ -1,0 +1,54 @@
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using TaskFlow.Application.Abstractions;
+using TaskFlow.Application.DTOs.Memberships;
+
+namespace TaskFlow.Api.Controllers
+{
+    [Authorize]
+    [Route("api/[controller]")]
+    [ApiController]
+    public class MembershipsController(IMembershipService service, IMapper mapper) : ControllerBase
+    {
+        private readonly IMembershipService _service = service;
+        private readonly IMapper _mapper = mapper;
+
+        [HttpGet()]
+        public async Task<ActionResult<IEnumerable<MembershipResponse>>> GetMyMemberships()
+        {
+            var result = await _service.GetUserMembershipsAsync();
+            var response = _mapper.Map<List<MembershipResponse>>(result);
+            return Ok(response);
+        }
+
+        [HttpGet("{organizationId}")]
+        public async Task<ActionResult<MembershipResponse?>> GetMyMembershipForOrganization(int organizationId)
+        {
+            var result = await _service.GetUserMembershipForOrgAsync(organizationId);
+            if (result == null)
+                return NotFound();
+            var response = _mapper.Map<MembershipResponse>(result);
+            return Ok(response);
+        }
+        [HttpGet("{organizationId}/all")]
+        public async Task<ActionResult<IEnumerable<MembershipResponse>>> GetAllMembershipsForOrganization(int organizationId)
+        {
+            var result = await _service.GetAllMembershipsForMyOrgAsync(organizationId);
+            var response = _mapper.Map<List<MembershipResponse>>(result);
+            return Ok(response);
+        }
+        [HttpPost()]
+        public async Task<IActionResult> AddMembership(MembershipRequest request)
+        {
+            var result = await _service.AddMembershipAsync(request.OrganizationId, request.UserId, request.Role);
+            if (!result)
+                return BadRequest();
+            return CreatedAtAction(
+                nameof(GetAllMembershipsForOrganization),
+                new { organizationId = request.OrganizationId },
+                request
+            );
+        }
+    }
+}

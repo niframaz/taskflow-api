@@ -1,0 +1,92 @@
+trigger:
+- master
+
+pool:
+  name: Default
+
+variables:
+  buildConfiguration: 'Release'
+
+
+parameters:
+  - name: environment
+    type: string
+    default: 'production'
+  - name: webAppName
+    type: string
+    default: 'TaskFlowApi'
+
+stages:
+
+# ---------------- BUILD STAGE ----------------
+- stage: Build
+  displayName: Build Stage
+  jobs:
+  - job: Build
+    displayName: Build
+    steps:
+
+    # Install correct .NET SDK
+    - task: UseDotNet@2
+      displayName: 'Install .NET 10 SDK'
+      inputs:
+        packageType: 'sdk'
+        version: '10.x'
+
+    # Restore packages
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore NuGet packages'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+
+    # Build project
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Project'
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '--configuration $(buildConfiguration)'
+
+    # Publish project
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Project'
+      inputs:
+        command: 'publish'
+        publishWebProjects: true
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+        zipAfterPublish: true
+
+    # Publish build artifacts
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'drop'
+
+# ---------------- DEPLOY STAGE ----------------
+- stage: Deploy
+  displayName: Deploy Stage
+  dependsOn: Build
+  jobs:
+
+  - deployment: DeployWebApp
+    displayName: 'Deploy Web App'
+    environment: ${{ parameters.environment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          # Download the published artifact
+          - download: current
+            artifact: drop
+
+          # Deploy the web app to Azure
+          - task: AzureWebApp@1
+            displayName: 'Deploy to Azure Web App'
+            inputs:
+              azureSubscription: 'AzureServiceConnection'
+              appName: '${{ parameters.webAppName }}'
+              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+              appType: 'webApp'

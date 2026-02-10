@@ -1,0 +1,6 @@
+@TaskFlow.Api_HostAddress = http://localhost:5111
+
+GET {{TaskFlow.Api_HostAddress}}/taskitem/
+Accept: application/json
+
+###

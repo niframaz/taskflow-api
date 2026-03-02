@@ -8,7 +8,6 @@ namespace TaskFlow.Api.Controllers
     [ApiController]
     public class OrganizationController : ControllerBase
     {
-        // GET: api/<OrganizationController>
         [HttpGet]
         public IEnumerable<string> Get()
         {

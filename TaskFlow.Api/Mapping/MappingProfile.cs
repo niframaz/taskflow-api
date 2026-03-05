@@ -10,6 +10,7 @@ namespace TaskFlow.Api.Mapping
         {
             CreateMap<TaskItemRequest, TaskItem>();
             CreateMap<UserRegistrationRequest, ApplicationUser>();
+            CreateMap<ProjectRequest, Project>();
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using TaskFlow.Domain.Entities;
-
-namespace TaskFlow.Application.Abstractions
+﻿namespace TaskFlow.Application.Abstractions
 {
     public interface IEntityService<T> where T : class
     {

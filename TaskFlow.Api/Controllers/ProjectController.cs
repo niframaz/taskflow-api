@@ -1,43 +1,72 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using TaskFlow.Api.Contracts;
+using TaskFlow.Application.Abstractions;
+using TaskFlow.Domain.Entities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TaskFlow.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class ProjectController : ControllerBase
+    public class ProjectController(IProjectService projectService, IMapper mapper, IHttpContextAccessor httpContextAccessor) : ControllerBase
     {
-        // GET: api/<ProjectController>
+        private readonly IProjectService _projectService = projectService;
+        private readonly IMapper _mapper = mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<IEnumerable<Project>>> Get()
         {
-            return new string[] { "value1", "value2" };
+            var result = await _projectService.GetAllAsync();
+            return Ok(result);
         }
 
-        // GET api/<ProjectController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<Project>> Get(int id)
         {
-            return "value";
+            var result = await _projectService.GetAsync(id);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+            return result;
         }
 
-        // POST api/<ProjectController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> Post([FromBody] ProjectRequest projectRequest)
         {
+            var request = _mapper.Map<Project>(projectRequest);
+            var organizationId = _httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(c => c.Type == "OrganizationId")?.Value;
+            request.OrganizationId = int.Parse(organizationId!);
+            var result = await _projectService.AddAsync(request);
+            if (result)
+                return CreatedAtAction(nameof(Get), new { id = request.Id }, request);
+            return StatusCode(500);
         }
 
-        // PUT api/<ProjectController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> Put(int id, [FromBody] ProjectRequest projectRequest)
         {
+            var request = _mapper.Map<Project>(projectRequest);
+            var organizationId = _httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(c => c.Type == "OrganizationId")?.Value;
+            request.OrganizationId = int.Parse(organizationId!);
+            var result = await _projectService.UpdateAsync(id, request);
+            if (result)
+                return NoContent();
+            return StatusCode(500);
         }
 
-        // DELETE api/<ProjectController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            var result = await _projectService.RemoveAsync(id);
+            if (result)
+                return NoContent();
+            return StatusCode(500);
         }
     }
 }

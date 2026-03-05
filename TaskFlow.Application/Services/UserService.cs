@@ -14,7 +14,7 @@ namespace TaskFlow.Application.Services
             var result = await _userRepository.CreateUserAsync(user, password);
             if (result)
             {
-                await _userRepository.AddUserToRoleAsync(user, UserRole.User.ToString());
+                await _userRepository.AddUserToRoleAsync(user, nameof(UserRole.User));
                 var token = await _jwtService.GenerateToken(user);
                 return token;
             }

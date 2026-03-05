@@ -11,5 +11,6 @@ namespace TaskFlow.Domain.Entities
         public string? Description { get; set; }
         public ICollection<Project> Projects { get; set; } = [];
         public ICollection<ApplicationUser> Users { get; set; } = [];
+        public ICollection<OrganizationRole> OrganizationRoles { get; set; } = [];
     }
 }

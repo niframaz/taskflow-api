@@ -20,9 +20,14 @@ namespace TaskFlow.Infrastructure.Security
                 new (JwtRegisteredClaimNames.Sub, user.Id),
                 new (JwtRegisteredClaimNames.UniqueName, user.UserName!),
                 new (JwtRegisteredClaimNames.Email, user.Email!),
-                new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new ("OrganizationId", user.OrganizationId.ToString())
+                new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            if (user.OrganizationId.HasValue)
+            {
+                claims.Add(new Claim("OrganizationId", user.OrganizationId.Value.ToString()));
+            }
+            claims.AddRange(user.OrganizationRoles.Select(r => new Claim("OrganizationRole", r.Name)));
 
             var roles = await _userManager.GetRolesAsync(user);
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));

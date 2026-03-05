@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskFlow.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using TaskFlow.Infrastructure.Data;
 namespace TaskFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260305144857_user dont need to belong to org")]
+    partial class userdontneedtobelongtoorg
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -300,35 +303,6 @@ namespace TaskFlow.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("TaskFlow.Domain.Entities.OrganizationRole", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("OrganizationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("OrganizationRoles");
-                });
-
             modelBuilder.Entity("TaskFlow.Domain.Entities.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -482,25 +456,6 @@ namespace TaskFlow.Infrastructure.Migrations
                     b.Navigation("TaskItem");
                 });
 
-            modelBuilder.Entity("TaskFlow.Domain.Entities.OrganizationRole", b =>
-                {
-                    b.HasOne("TaskFlow.Domain.Entities.Organization", "Organization")
-                        .WithMany("OrganizationRoles")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaskFlow.Domain.Entities.ApplicationUser", "User")
-                        .WithMany("OrganizationRoles")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TaskFlow.Domain.Entities.Project", b =>
                 {
                     b.HasOne("TaskFlow.Domain.Entities.Organization", "Organization")
@@ -524,15 +479,11 @@ namespace TaskFlow.Infrastructure.Migrations
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.ApplicationUser", b =>
                 {
-                    b.Navigation("OrganizationRoles");
-
                     b.Navigation("TaskItems");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.Organization", b =>
                 {
-                    b.Navigation("OrganizationRoles");
-
                     b.Navigation("Projects");
 
                     b.Navigation("Users");

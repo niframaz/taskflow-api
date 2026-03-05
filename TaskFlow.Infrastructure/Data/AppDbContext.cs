@@ -10,6 +10,7 @@ namespace TaskFlow.Infrastructure.Data
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<OrganizationRole> OrganizationRoles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -43,6 +44,21 @@ namespace TaskFlow.Infrastructure.Data
                 .WithMany(o => o.Users)
                 .HasForeignKey(u => u.OrganizationId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OrganizationRole>()
+                .HasOne(or => or.User)
+                .WithMany(u => u.OrganizationRoles)
+                .HasForeignKey(or => or.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrganizationRole>()
+                .HasOne(or => or.Organization)
+                .WithMany(o => o.OrganizationRoles)
+                .HasForeignKey(or => or.OrganizationId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
 
 
             modelBuilder.Entity<Organization>().HasData(new Organization

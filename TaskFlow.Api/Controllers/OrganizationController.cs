@@ -1,42 +1,74 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using TaskFlow.Api.Contracts;
+using TaskFlow.Application.Abstractions;
+using TaskFlow.Domain.Entities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TaskFlow.Api.Controllers
 {
+    [Authorize(Roles = "SuperAdmin")]
     [Route("api/[controller]")]
     [ApiController]
-    public class OrganizationController : ControllerBase
+    public class OrganizationController(IOrganizationService service, IMapper mapper) : ControllerBase
     {
+        private readonly IOrganizationService _service = service;
+        private readonly IMapper _mapper = mapper;
+
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<IEnumerable<Organization>>> Get()
         {
-            return new string[] { "value1", "value2" };
+            var result = await _service.GetAllAsync();
+            return Ok(result); ;
         }
 
-        // GET api/<OrganizationController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<Organization>> Get(int id)
         {
-            return "value";
+            var result = await _service.GetAsync(id);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            return Ok(result);
         }
 
-        // POST api/<OrganizationController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> Post([FromBody] OrganizationRequest request)
         {
+            var result = _mapper.Map<Organization>(request);
+            var created = await _service.AddAsync(result);
+            if(created)
+            {
+                return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+            }
+            return StatusCode(500);
         }
 
-        // PUT api/<OrganizationController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> Put(int id, [FromBody] OrganizationRequest request)
         {
+            var result = _mapper.Map<Organization>(request);
+            result.Id = id;
+            var updated = await _service.UpdateAsync(id, result);
+            if (updated)
+            {
+                return NoContent();
+            }
+            return StatusCode(500);
         }
 
-        // DELETE api/<OrganizationController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            var deleted = await _service.RemoveAsync(id);
+            if (deleted)
+            {
+                return NoContent();
+            }
+            return StatusCode(500);
         }
     }
 }

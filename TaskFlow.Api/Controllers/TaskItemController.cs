@@ -11,11 +11,10 @@ namespace TaskFlow.Api.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class TaskItemController(ITaskService taskService, IMapper mapper, IHttpContextAccessor httpContextAccessor) : ControllerBase
+    public class TaskItemController(ITaskService taskService, IMapper mapper) : ControllerBase
     {
         private readonly ITaskService _taskService = taskService;
         private readonly IMapper _mapper = mapper;
-        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskItem>>> Get()
@@ -36,7 +35,7 @@ namespace TaskFlow.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] TaskItemRequest taskItemrequest)
         {
-            var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             var taskItem = _mapper.Map<TaskItem>(taskItemrequest);
             taskItem.UserId = userId;

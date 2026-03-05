@@ -41,6 +41,7 @@ builder.Services.AddScoped<ITaskService,TaskService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Program.cs
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));

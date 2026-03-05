@@ -12,11 +12,11 @@ namespace TaskFlow.Api.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class ProjectController(IProjectService projectService, IMapper mapper, IHttpContextAccessor httpContextAccessor) : ControllerBase
+    public class ProjectController(IProjectService projectService, IMapper mapper) : ControllerBase
     {
         private readonly IProjectService _projectService = projectService;
         private readonly IMapper _mapper = mapper;
-        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        private string? OrganizationId => User.FindFirst("OrganizationId")?.Value;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Project>>> Get()
@@ -40,7 +40,7 @@ namespace TaskFlow.Api.Controllers
         public async Task<IActionResult> Post([FromBody] ProjectRequest projectRequest)
         {
             var request = _mapper.Map<Project>(projectRequest);
-            var organizationId = _httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(c => c.Type == "OrganizationId")?.Value;
+            var organizationId = OrganizationId;
             request.OrganizationId = int.Parse(organizationId!);
             var result = await _projectService.AddAsync(request);
             if (result)
@@ -52,7 +52,7 @@ namespace TaskFlow.Api.Controllers
         public async Task<IActionResult> Put(int id, [FromBody] ProjectRequest projectRequest)
         {
             var request = _mapper.Map<Project>(projectRequest);
-            var organizationId = _httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(c => c.Type == "OrganizationId")?.Value;
+            var organizationId = OrganizationId;
             request.OrganizationId = int.Parse(organizationId!);
             var result = await _projectService.UpdateAsync(id, request);
             if (result)

@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Contracts;
 using TaskFlow.Application.Abstractions;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Domain.Enums;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TaskFlow.Api.Controllers
 {
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [Route("api/[controller]")]
     [ApiController]
     public class OrganizationController(IOrganizationService service, IMapper mapper) : ControllerBase

@@ -42,7 +42,6 @@ namespace TaskFlow.Infrastructure.Data
                 .HasOne(u => u.Organization)
                 .WithMany(o => o.Users)
                 .HasForeignKey(u => u.OrganizationId)
-                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
 

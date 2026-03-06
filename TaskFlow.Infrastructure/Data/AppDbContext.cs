@@ -107,62 +107,28 @@ namespace TaskFlow.Infrastructure.Data
                 .HasIndex(cr => new { cr.CommentId, cr.UserId })
                 .IsUnique();
 
-            //modelBuilder.Entity<Project>()
-            //    .HasOne(p => p.Organization)
-            //    .WithMany(o => o.Projects)
-            //    .HasForeignKey(p => p.OrganizationId)
-            //    .IsRequired()
-            //    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<OrganizationUserRole>()
+                .HasIndex(cr => new { cr.OrganizationId, cr.UserId })
+                .IsUnique();
 
-            //modelBuilder.Entity<OrganizationUserRole>()
-            //    .HasOne(or => or.User)
-            //    .WithMany(u => u.OrganizationUserRoles)
-            //    .HasForeignKey(or => or.UserId)
-            //    .IsRequired()
-            //    .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<OrganizationRole>()
+                .HasIndex(cr => new { cr.OrganizationUserRoleId, cr.Role })
+                .IsUnique();
 
-            //modelBuilder.Entity<ApplicationUser>()
-            //    .HasMany(u => u.TaskItems)
-            //    .WithOne(t => t.User)
-            //    .HasForeignKey(t => t.UserId)
-            //    .IsRequired(false)
-            //    .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<TaskReaction>()
+                .HasIndex(tr => new { tr.TaskItemId, tr.UserId })
+                .IsUnique();
 
-            //modelBuilder.Entity<Organization>()
-            //    .HasMany(u => u.Users)
-            //    .WithMany(o => o.Organizations);
+            modelBuilder.Entity<CommentReaction>()
+                .HasIndex(cr => new { cr.CommentId, cr.UserId })
+                .IsUnique();
 
-            //modelBuilder.Entity<Project>()
-            //    .HasMany(u => u.Users)
-            //    .WithMany(p => p.Projects);
+            modelBuilder.Entity<OrganizationUserRole>()
+                .HasIndex(ou => new { ou.OrganizationId, ou.UserId })
+                .IsUnique();
 
-            //modelBuilder.Entity<Project>()
-            //    .HasMany(u => u.TaskItems)
-            //    .WithOne(p => p.Project)
-            //    .HasForeignKey(t => t.ProjectId)
-            //    .IsRequired()
-            //    .OnDelete(DeleteBehavior.Restrict);
-
-            //modelBuilder.Entity<TaskItem>()
-            //    .HasMany(t => t.Comments)
-            //    .WithOne(u => u.TaskItem)
-            //    .HasForeignKey(t => t.TaskItemId)
-            //    .IsRequired()
-            //    .OnDelete(DeleteBehavior.Cascade);
-
-            //modelBuilder.Entity<TaskItem>()
-            //    .HasMany(t => t.TaskReactions)
-            //    .WithOne(u => u.TaskItem)
-            //    .HasForeignKey(t => t.TaskItemId)
-            //    .IsRequired()
-            //    .OnDelete(DeleteBehavior.Cascade);
-
-            //modelBuilder.Entity<Comment>()
-            //    .HasMany(c => c.CommentReactions)
-            //    .WithOne(t => t.Comment)
-            //    .HasForeignKey(c => c.CommentId)
-            //    .IsRequired()
-            //    .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<TaskItem>()
+                .HasIndex(t => new { t.ProjectId, t.Title });
 
             //modelBuilder.Entity<Organization>().HasData(new Organization
             //{

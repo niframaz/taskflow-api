@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using TaskFlow.Domain.Enums;
+﻿using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Domain.Entities
 {

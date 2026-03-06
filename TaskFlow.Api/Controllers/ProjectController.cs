@@ -16,7 +16,6 @@ namespace TaskFlow.Api.Controllers
     {
         private readonly IProjectService _projectService = projectService;
         private readonly IMapper _mapper = mapper;
-        private string? OrganizationId => User.FindFirst("OrganizationId")?.Value;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Project>>> Get()
@@ -37,11 +36,10 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ProjectRequest projectRequest)
+        public async Task<IActionResult> Post([FromBody] ProjectRequest projectRequest, [FromRoute] int organizationId)
         {
             var request = _mapper.Map<Project>(projectRequest);
-            var organizationId = OrganizationId;
-            request.OrganizationId = int.Parse(organizationId!);
+            request.OrganizationId = organizationId;
             var result = await _projectService.AddAsync(request);
             if (result)
                 return CreatedAtAction(nameof(Get), new { id = request.Id }, request);
@@ -49,11 +47,10 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] ProjectRequest projectRequest)
+        public async Task<IActionResult> Put(int id, [FromBody] ProjectRequest projectRequest, [FromRoute] int organizationId)
         {
             var request = _mapper.Map<Project>(projectRequest);
-            var organizationId = OrganizationId;
-            request.OrganizationId = int.Parse(organizationId!);
+            request.OrganizationId = organizationId;
             var result = await _projectService.UpdateAsync(id, request);
             if (result)
                 return NoContent();

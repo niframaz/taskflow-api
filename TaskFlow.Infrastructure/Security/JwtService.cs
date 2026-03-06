@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using TaskFlow.Application.Abstractions;
 using TaskFlow.Domain.Entities;
 
@@ -22,12 +23,6 @@ namespace TaskFlow.Infrastructure.Security
                 new (JwtRegisteredClaimNames.Email, user.Email!),
                 new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-
-            if (user.OrganizationId.HasValue)
-            {
-                claims.Add(new Claim("OrganizationId", user.OrganizationId.Value.ToString()));
-            }
-            claims.AddRange(user.OrganizationRoles.Select(r => new Claim("OrganizationRole", r.Name)));
 
             var roles = await _userManager.GetRolesAsync(user);
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));

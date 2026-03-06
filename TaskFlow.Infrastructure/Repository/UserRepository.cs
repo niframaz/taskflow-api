@@ -1,8 +1,6 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using TaskFlow.Application.Abstractions;
 using TaskFlow.Domain.Entities;
-using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Infrastructure.Repository
 {

@@ -10,16 +10,54 @@ namespace TaskFlow.Infrastructure.Data
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<Comment> Comments { get; set; }
-        public DbSet<OrganizationRole> OrganizationRoles { get; set; }
+        public DbSet<OrganizationUserRole> OrganizationUserRoles { get; set; }
+        public DbSet<CommentReaction> CommentReactions { get; set; }
+        public DbSet<TaskReaction> TaskReactions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(u => u.Organizations)
+                .WithMany(p => p.Users);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(u => u.Projects)
+                .WithMany(p => p.Users);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(u => u.OrganizationUserRoles)
+                .WithOne(t => t.User)
+                .HasForeignKey(t => t.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Organization>()
+                .HasMany(u => u.Projects)
+                .WithOne(o => o.Organization)
+                .HasForeignKey(u => u.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<TaskItem>()
                 .HasOne(t => t.User)
                 .WithMany(u => u.TaskItems)
                 .HasForeignKey(t => t.UserId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<TaskItem>()
+                .HasOne(t => t.Project)
+                .WithMany(u => u.TaskItems)
+                .HasForeignKey(t => t.ProjectId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TaskReaction>()
+                .HasOne(t => t.TaskItem)
+                .WithMany(u => u.TaskReactions)
+                .HasForeignKey(t => t.TaskItemId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.TaskItem)
@@ -28,82 +66,118 @@ namespace TaskFlow.Infrastructure.Data
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ApplicationUser>()
-                .HasMany(u => u.Projects)
-                .WithMany(p => p.Users);
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(u => u.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
 
-            modelBuilder.Entity<Project>()
-                .HasOne(p => p.Organization)
-                .WithMany(o => o.Projects)
-                .HasForeignKey(p => p.OrganizationId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<ApplicationUser>()
-                .HasOne(u => u.Organization)
-                .WithMany(o => o.Users)
-                .HasForeignKey(u => u.OrganizationId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<OrganizationRole>()
-                .HasOne(or => or.User)
-                .WithMany(u => u.OrganizationRoles)
-                .HasForeignKey(or => or.UserId)
+            modelBuilder.Entity<CommentReaction>()
+                .HasOne(c => c.Comment)
+                .WithMany(t => t.CommentReactions)
+                .HasForeignKey(c => c.CommentId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<OrganizationRole>()
+            modelBuilder.Entity<CommentReaction>()
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(u => u.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<OrganizationUserRole>()
                 .HasOne(or => or.Organization)
-                .WithMany(o => o.OrganizationRoles)
-                .HasForeignKey(or => or.OrganizationId)
+                .WithMany()
+                .HasForeignKey(o => o.OrganizationId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<OrganizationRole>()
+                .HasOne(or => or.OrganizationUserRole)
+                .WithMany(or => or.OrganizationRoles)
+                .HasForeignKey(o => o.OrganizationUserRoleId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<TaskReaction>()
+                .HasIndex(tr => new { tr.TaskItemId, tr.UserId })
+                .IsUnique();
 
-            modelBuilder.Entity<Organization>().HasData(new Organization
-            {
-                Id = 1,
-                Name = "Acme Corp",
-                Description = "Sample organization for seeding"
-            });
+            modelBuilder.Entity<CommentReaction>()
+                .HasIndex(cr => new { cr.CommentId, cr.UserId })
+                .IsUnique();
 
-            modelBuilder.Entity<Project>().HasData(new Project
-            {
-                Id = 1,
-                Name = "Project Alpha",
-                Description = "Sample project",
-                OrganizationId = 1
-            });
+            //modelBuilder.Entity<Project>()
+            //    .HasOne(p => p.Organization)
+            //    .WithMany(o => o.Projects)
+            //    .HasForeignKey(p => p.OrganizationId)
+            //    .IsRequired()
+            //    .OnDelete(DeleteBehavior.Restrict);
 
-            //modelBuilder.Entity<ApplicationUser>().HasData(new ApplicationUser
+            //modelBuilder.Entity<OrganizationUserRole>()
+            //    .HasOne(or => or.User)
+            //    .WithMany(u => u.OrganizationUserRoles)
+            //    .HasForeignKey(or => or.UserId)
+            //    .IsRequired()
+            //    .OnDelete(DeleteBehavior.Cascade);
+
+            //modelBuilder.Entity<ApplicationUser>()
+            //    .HasMany(u => u.TaskItems)
+            //    .WithOne(t => t.User)
+            //    .HasForeignKey(t => t.UserId)
+            //    .IsRequired(false)
+            //    .OnDelete(DeleteBehavior.SetNull);
+
+            //modelBuilder.Entity<Organization>()
+            //    .HasMany(u => u.Users)
+            //    .WithMany(o => o.Organizations);
+
+            //modelBuilder.Entity<Project>()
+            //    .HasMany(u => u.Users)
+            //    .WithMany(p => p.Projects);
+
+            //modelBuilder.Entity<Project>()
+            //    .HasMany(u => u.TaskItems)
+            //    .WithOne(p => p.Project)
+            //    .HasForeignKey(t => t.ProjectId)
+            //    .IsRequired()
+            //    .OnDelete(DeleteBehavior.Restrict);
+
+            //modelBuilder.Entity<TaskItem>()
+            //    .HasMany(t => t.Comments)
+            //    .WithOne(u => u.TaskItem)
+            //    .HasForeignKey(t => t.TaskItemId)
+            //    .IsRequired()
+            //    .OnDelete(DeleteBehavior.Cascade);
+
+            //modelBuilder.Entity<TaskItem>()
+            //    .HasMany(t => t.TaskReactions)
+            //    .WithOne(u => u.TaskItem)
+            //    .HasForeignKey(t => t.TaskItemId)
+            //    .IsRequired()
+            //    .OnDelete(DeleteBehavior.Cascade);
+
+            //modelBuilder.Entity<Comment>()
+            //    .HasMany(c => c.CommentReactions)
+            //    .WithOne(t => t.Comment)
+            //    .HasForeignKey(c => c.CommentId)
+            //    .IsRequired()
+            //    .OnDelete(DeleteBehavior.Cascade);
+
+            //modelBuilder.Entity<Organization>().HasData(new Organization
             //{
-            //    Id = "user-1",
-            //    UserName = "john.doe",
-            //    NormalizedUserName = "JOHN.DOE",
-            //    Email = "john.doe@example.com",
-            //    NormalizedEmail = "JOHN.DOE@EXAMPLE.COM",
-            //    EmailConfirmed = false,
-            //    Name = "John Doe",
+            //    Id = 1,
+            //    Name = "Acme Corp",
+            //    Description = "Sample organization for seeding"
+            //});
+
+            //modelBuilder.Entity<Project>().HasData(new Project
+            //{
+            //    Id = 1,
+            //    Name = "Project Alpha",
+            //    Description = "Sample project",
             //    OrganizationId = 1,
-            //    SecurityStamp = "00000000-0000-0000-0000-000000000001"
-            //});
-
-            //modelBuilder.Entity<TaskItem>().HasData(new TaskItem
-            //{
-            //    Id = 1,
-            //    Title = "Initial Task",
-            //    Description = "Sample task assigned to user",
-            //    UserId = "user-1",
-            //    Liked = false
-            //});
-
-            //modelBuilder.Entity<Comment>().HasData(new Comment
-            //{
-            //    Id = 1,
-            //    Message = "This is a sample comment",
-            //    Reaction = TaskFlow.Domain.Enums.Reaction.Like,
-            //    TaskItemId = 1
+            //    Organization = null!
             //});
         }
     }

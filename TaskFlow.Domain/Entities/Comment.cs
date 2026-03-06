@@ -1,13 +1,13 @@
-﻿using TaskFlow.Domain.Enums;
-
-namespace TaskFlow.Domain.Entities
+﻿namespace TaskFlow.Domain.Entities
 {
     public class Comment
     {
         public int Id { get; set; }
         public required string Message { get; set; }
-        public Reaction Reaction { get; set; }
-        public TaskItem TaskItem { get; set; } = default!;
+        public ICollection<CommentReaction> CommentReactions { get; set; } = [];
+        public required TaskItem TaskItem { get; set; }
         public int TaskItemId { get; set; }
+        public ApplicationUser? User { get; set; }
+        public string? UserId { get; set; }
     }
 }

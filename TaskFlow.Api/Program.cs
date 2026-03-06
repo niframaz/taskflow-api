@@ -75,6 +75,8 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<MappingProfile>();
 });
 
+builder.Services.AddMemoryCache();
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();

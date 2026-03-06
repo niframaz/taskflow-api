@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskFlow.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using TaskFlow.Infrastructure.Data;
 namespace TaskFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260306144209_Adding OrgRoles enum")]
+    partial class AddingOrgRolesenum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -332,27 +335,6 @@ namespace TaskFlow.Infrastructure.Migrations
                     b.ToTable("Organizations");
                 });
 
-            modelBuilder.Entity("TaskFlow.Domain.Entities.OrganizationRole", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("OrganizationUserRoleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationUserRoleId");
-
-                    b.ToTable("OrganizationRole");
-                });
-
             modelBuilder.Entity("TaskFlow.Domain.Entities.OrganizationUserRole", b =>
                 {
                     b.Property<int>("Id")
@@ -360,6 +342,10 @@ namespace TaskFlow.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.PrimitiveCollection<string>("OrgRoles")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OrganizationId")
                         .HasColumnType("int");
@@ -581,17 +567,6 @@ namespace TaskFlow.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TaskFlow.Domain.Entities.OrganizationRole", b =>
-                {
-                    b.HasOne("TaskFlow.Domain.Entities.OrganizationUserRole", "OrganizationUserRole")
-                        .WithMany("OrganizationRoles")
-                        .HasForeignKey("OrganizationUserRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("OrganizationUserRole");
-                });
-
             modelBuilder.Entity("TaskFlow.Domain.Entities.OrganizationUserRole", b =>
                 {
                     b.HasOne("TaskFlow.Domain.Entities.Organization", "Organization")
@@ -674,11 +649,6 @@ namespace TaskFlow.Infrastructure.Migrations
             modelBuilder.Entity("TaskFlow.Domain.Entities.Organization", b =>
                 {
                     b.Navigation("Projects");
-                });
-
-            modelBuilder.Entity("TaskFlow.Domain.Entities.OrganizationUserRole", b =>
-                {
-                    b.Navigation("OrganizationRoles");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.Project", b =>

@@ -11,7 +11,9 @@ namespace TaskFlow.Domain.Entities
         public string? Description { get; set; }
         public string? UserId { get; set; }
         public ApplicationUser? User { get; set; }
-        public bool Liked { get; set; }
+        public int ProjectId { get; set; }
+        public required Project Project { get; set; }
         public ICollection<Comment> Comments { get; set; } = [];
+        public ICollection<TaskReaction> TaskReactions { get; set; } = [];
     }
 }

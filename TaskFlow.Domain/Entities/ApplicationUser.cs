@@ -7,10 +7,9 @@ namespace TaskFlow.Domain.Entities
     {
         [MaxLength(100)]
         public required string Name { get; set; }
-        public int? OrganizationId { get; set; }
-        public Organization? Organization { get; set; }
+        public ICollection<Organization> Organizations { get; set; } = default!;
         public ICollection<Project> Projects { get; set; } = [];
-        public ICollection<TaskItem>? TaskItems { get; set; }
-        public ICollection<OrganizationRole> OrganizationRoles { get; set; } = [];
+        public ICollection<TaskItem> TaskItems { get; set; } = [];
+        public ICollection<OrganizationUserRole> OrganizationUserRoles { get; set; } = [];
     }
 }

@@ -1,16 +1,14 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TaskFlow.Api.Contracts;
 using TaskFlow.Application.Abstractions;
 using TaskFlow.Domain.Entities;
-using TaskFlow.Domain.Enums;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TaskFlow.Api.Controllers
 {
-    [Authorize(Roles = nameof(UserRole.Admin))]
     [Route("api/[controller]")]
     [ApiController]
     public class OrganizationController(IOrganizationService service, IMapper mapper) : ControllerBase
@@ -39,13 +37,13 @@ namespace TaskFlow.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] OrganizationRequest request)
         {
-            var result = _mapper.Map<Organization>(request);
-            var created = await _service.AddAsync(result);
-            if(created)
+            var org = _mapper.Map<Organization>(request);
+            var result = await _service.AddWithUserAsync(org);
+            if(result == null)
             {
-                return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+                return StatusCode(500);
             }
-            return StatusCode(500);
+            return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}")]

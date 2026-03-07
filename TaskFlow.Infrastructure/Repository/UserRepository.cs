@@ -18,6 +18,10 @@ namespace TaskFlow.Infrastructure.Repository
         {
             return await _userManager.FindByEmailAsync(email);
         }
+        public async Task<ApplicationUser?> GetUserByIdAsync(string id)
+        {
+            return await _userManager.FindByIdAsync(id);
+        }
         public async Task<bool> ValidateUserPasswordAsync(ApplicationUser user, string password)
         {
             return await _userManager.CheckPasswordAsync(user, password);

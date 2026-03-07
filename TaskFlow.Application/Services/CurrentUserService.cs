@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 using TaskFlow.Application.Abstractions;
 
 namespace TaskFlow.Application.Services
@@ -7,8 +8,6 @@ namespace TaskFlow.Application.Services
     {
          private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     
-         public string? UserId => _httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value;
-         public string? UserRole => _httpContextAccessor.HttpContext?.User.FindFirst("role")?.Value;
-
+         public string? UserId => _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 }

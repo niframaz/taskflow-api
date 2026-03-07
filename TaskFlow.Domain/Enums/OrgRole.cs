@@ -1,6 +1,6 @@
 ﻿namespace TaskFlow.Domain.Enums
 {
-    public enum OrgRoles
+    public enum OrgRole
     {
         Member,
         Admin

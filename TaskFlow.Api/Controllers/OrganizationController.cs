@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TaskFlow.Api.Contracts;
@@ -9,6 +10,7 @@ using TaskFlow.Domain.Entities;
 
 namespace TaskFlow.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OrganizationController(IOrganizationService service, IMapper mapper) : ControllerBase
@@ -39,11 +41,12 @@ namespace TaskFlow.Api.Controllers
         {
             var org = _mapper.Map<Organization>(request);
             var result = await _service.AddWithUserAsync(org);
-            if(result == null)
+            if(result)
             {
-                return StatusCode(500);
+                var orgDto = _mapper.Map<OrganizationResponse>(org);
+                return CreatedAtAction(nameof(Get), new { id = org.Id }, orgDto);               
             }
-            return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+            return StatusCode(500);
         }
 
         [HttpPut("{id}")]

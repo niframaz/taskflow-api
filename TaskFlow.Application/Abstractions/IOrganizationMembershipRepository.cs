@@ -2,7 +2,7 @@
 
 namespace TaskFlow.Application.Abstractions
 {
-    public interface IOrganizationMembershipRepository
+    public interface IOrganizationMembershipRepository : IRepository<OrganizationMembership>
     {
         Task<List<OrganizationMembership>> GetUserMembershipsAsync(string userId);
     }

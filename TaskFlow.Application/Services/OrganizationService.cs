@@ -1,32 +1,34 @@
 ﻿using TaskFlow.Application.Abstractions;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Application.Services
 {
-    public class OrganizationService(IOrganizationRepository repository, IUserRepository userRepository, ICurrentUserService currentUserService) : 
+    public class OrganizationService(IOrganizationRepository repository, IUserRepository userRepository, ICurrentUserService currentUserService,
+        IOrganizationMembershipRepository membershipRepository) : 
         EntityService<Organization>(repository), IOrganizationService
     {
         private readonly IOrganizationRepository _repository = repository;
         private readonly IUserRepository _userRepository = userRepository;
         private readonly ICurrentUserService _currentUserService = currentUserService;
+        private readonly IOrganizationMembershipRepository _membershipRepository = membershipRepository;
 
-        public async Task<OrganizationDto?> AddWithUserAsync(Organization organization)
+        public async Task<bool> AddWithUserAsync(Organization organization)
         {
             var user = await _userRepository.GetUserByIdAsync(_currentUserService.UserId!);
-
-            organization.Users.Add(user!);
-            _repository.Add(organization);
+            _membershipRepository.Add(new OrganizationMembership
+            { 
+                Organization = organization, 
+                User = user!,
+                OrganizationRoles =
+                [
+                    new() {
+                        Role = OrgRole.Admin
+                    }
+                ]
+            });
             var success = await _repository.SaveChangesAsync();
-            if (!success)
-            {
-                return null;
-            }
-            var result = new OrganizationDto
-            {
-                Id = organization.Id,
-                Name = organization.Name
-            };
-            return result;
+            return success;
         }
         public async Task<bool> UpdateAsync(int id, Organization organization)
         {

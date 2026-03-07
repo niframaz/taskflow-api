@@ -62,7 +62,7 @@ namespace TaskFlow.Application.Services
 
             if (user is not null)
             {
-                var userOrg = user.Organizations.Select(o => o.Id);
+                //var userOrg = user.Organizations.Select(o => o.Id);
 
                 var result = await _userRepository.AddUserToRoleAsync(user, role.ToString());
                 return result;

@@ -18,15 +18,11 @@ namespace TaskFlow.Infrastructure.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<ApplicationUser>()
-                .HasMany(u => u.Organizations)
-                .WithMany(p => p.Users);
-
-            modelBuilder.Entity<ApplicationUser>()
                 .HasMany(u => u.Projects)
                 .WithMany(p => p.Users);
 
             modelBuilder.Entity<ApplicationUser>()
-                .HasMany(u => u.OrganizationUserRoles)
+                .HasMany(u => u.OrganizationMemberships)
                 .WithOne(t => t.User)
                 .HasForeignKey(t => t.UserId)
                 .IsRequired()
@@ -70,6 +66,7 @@ namespace TaskFlow.Infrastructure.Data
                 .HasOne(c => c.User)
                 .WithMany()
                 .HasForeignKey(u => u.UserId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<CommentReaction>()
@@ -83,17 +80,18 @@ namespace TaskFlow.Infrastructure.Data
                 .HasOne(c => c.User)
                 .WithMany()
                 .HasForeignKey(u => u.UserId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<OrganizationMembership>()
                 .HasOne(or => or.Organization)
-                .WithMany()
+                .WithMany(m => m.OrganizationMemberships)
                 .HasForeignKey(o => o.OrganizationId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<OrganizationRole>()
-                .HasOne(or => or.OrganizationUserRole)
+                .HasOne(or => or.OrganizationMembership)
                 .WithMany(or => or.OrganizationRoles)
                 .HasForeignKey(o => o.OrganizationMembershipId)
                 .IsRequired()
@@ -113,18 +111,6 @@ namespace TaskFlow.Infrastructure.Data
 
             modelBuilder.Entity<OrganizationRole>()
                 .HasIndex(cr => new { cr.OrganizationMembershipId, cr.Role })
-                .IsUnique();
-
-            modelBuilder.Entity<TaskReaction>()
-                .HasIndex(tr => new { tr.TaskItemId, tr.UserId })
-                .IsUnique();
-
-            modelBuilder.Entity<CommentReaction>()
-                .HasIndex(cr => new { cr.CommentId, cr.UserId })
-                .IsUnique();
-
-            modelBuilder.Entity<OrganizationMembership>()
-                .HasIndex(ou => new { ou.OrganizationId, ou.UserId })
                 .IsUnique();
 
             modelBuilder.Entity<TaskItem>()

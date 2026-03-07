@@ -5,7 +5,7 @@ using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Repository
 {
-    public class OrganizationMembershipRepository(AppDbContext dbContext) : IOrganizationMembershipRepository
+    public class OrganizationMembershipRepository(AppDbContext dbContext) : Repository<OrganizationMembership>(dbContext), IOrganizationMembershipRepository
     {
         private readonly AppDbContext _dbContext = dbContext;
         public async Task<List<OrganizationMembership>> GetUserMembershipsAsync(string userId)

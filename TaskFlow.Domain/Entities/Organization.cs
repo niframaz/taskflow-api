@@ -10,6 +10,7 @@ namespace TaskFlow.Domain.Entities
         [MaxLength(1000)]
         public string? Description { get; set; }
         public ICollection<Project> Projects { get; set; } = [];
-        public ICollection<ApplicationUser> Users { get; set; } = [];
+        //public ICollection<ApplicationUser> Users { get; set; } = [];
+        public ICollection<OrganizationMembership> OrganizationMemberships { get; set; } = [];
     }
 }

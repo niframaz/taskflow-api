@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskFlow.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using TaskFlow.Infrastructure.Data;
 namespace TaskFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260307050942_Renaming OrganizationUserRole to OrganizationMembership")]
+    partial class RenamingOrganizationUserRoletoOrganizationMembership
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,7 @@ namespace TaskFlow.Infrastructure.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("ApplicationUserOrganization", (string)null);
+                    b.ToTable("ApplicationUserOrganization");
                 });
 
             modelBuilder.Entity("ApplicationUserProject", b =>
@@ -49,7 +52,7 @@ namespace TaskFlow.Infrastructure.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("ApplicationUserProject", (string)null);
+                    b.ToTable("ApplicationUserProject");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -279,7 +282,7 @@ namespace TaskFlow.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.CommentReaction", b =>
@@ -307,7 +310,7 @@ namespace TaskFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL");
 
-                    b.ToTable("CommentReactions", (string)null);
+                    b.ToTable("CommentReactions");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.Organization", b =>
@@ -329,7 +332,7 @@ namespace TaskFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Organizations", (string)null);
+                    b.ToTable("Organizations");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.OrganizationMembership", b =>
@@ -354,7 +357,7 @@ namespace TaskFlow.Infrastructure.Migrations
                     b.HasIndex("OrganizationId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("OrganizationMemberships", (string)null);
+                    b.ToTable("OrganizationMemberships");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.OrganizationRole", b =>
@@ -376,7 +379,7 @@ namespace TaskFlow.Infrastructure.Migrations
                     b.HasIndex("OrganizationMembershipId", "Role")
                         .IsUnique();
 
-                    b.ToTable("OrganizationRole", (string)null);
+                    b.ToTable("OrganizationRole");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.Project", b =>
@@ -403,7 +406,7 @@ namespace TaskFlow.Infrastructure.Migrations
 
                     b.HasIndex("OrganizationId");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.TaskItem", b =>
@@ -435,7 +438,7 @@ namespace TaskFlow.Infrastructure.Migrations
 
                     b.HasIndex("ProjectId", "Title");
 
-                    b.ToTable("TaskItems", (string)null);
+                    b.ToTable("TaskItems");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.TaskReaction", b =>
@@ -463,7 +466,7 @@ namespace TaskFlow.Infrastructure.Migrations
                     b.HasIndex("TaskItemId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("TaskReactions", (string)null);
+                    b.ToTable("TaskReactions");
                 });
 
             modelBuilder.Entity("ApplicationUserOrganization", b =>

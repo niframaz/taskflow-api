@@ -10,7 +10,7 @@ namespace TaskFlow.Infrastructure.Data
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<Comment> Comments { get; set; }
-        public DbSet<OrganizationUserRole> OrganizationUserRoles { get; set; }
+        public DbSet<OrganizationMembership> OrganizationMemberships { get; set; }
         public DbSet<CommentReaction> CommentReactions { get; set; }
         public DbSet<TaskReaction> TaskReactions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -85,7 +85,7 @@ namespace TaskFlow.Infrastructure.Data
                 .HasForeignKey(u => u.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            modelBuilder.Entity<OrganizationUserRole>()
+            modelBuilder.Entity<OrganizationMembership>()
                 .HasOne(or => or.Organization)
                 .WithMany()
                 .HasForeignKey(o => o.OrganizationId)
@@ -95,7 +95,7 @@ namespace TaskFlow.Infrastructure.Data
             modelBuilder.Entity<OrganizationRole>()
                 .HasOne(or => or.OrganizationUserRole)
                 .WithMany(or => or.OrganizationRoles)
-                .HasForeignKey(o => o.OrganizationUserRoleId)
+                .HasForeignKey(o => o.OrganizationMembershipId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -107,12 +107,12 @@ namespace TaskFlow.Infrastructure.Data
                 .HasIndex(cr => new { cr.CommentId, cr.UserId })
                 .IsUnique();
 
-            modelBuilder.Entity<OrganizationUserRole>()
+            modelBuilder.Entity<OrganizationMembership>()
                 .HasIndex(cr => new { cr.OrganizationId, cr.UserId })
                 .IsUnique();
 
             modelBuilder.Entity<OrganizationRole>()
-                .HasIndex(cr => new { cr.OrganizationUserRoleId, cr.Role })
+                .HasIndex(cr => new { cr.OrganizationMembershipId, cr.Role })
                 .IsUnique();
 
             modelBuilder.Entity<TaskReaction>()
@@ -123,7 +123,7 @@ namespace TaskFlow.Infrastructure.Data
                 .HasIndex(cr => new { cr.CommentId, cr.UserId })
                 .IsUnique();
 
-            modelBuilder.Entity<OrganizationUserRole>()
+            modelBuilder.Entity<OrganizationMembership>()
                 .HasIndex(ou => new { ou.OrganizationId, ou.UserId })
                 .IsUnique();
 

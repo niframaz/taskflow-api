@@ -42,18 +42,6 @@ namespace TaskFlow.Api.Controllers
             return Unauthorized();
         }
         [Authorize(Roles = nameof(UserRole.Admin))]
-        [HttpPost("assign-role")]
-        public async Task<IActionResult> AssignRole(UserRoleAssignmentRequest request)
-        {
-            var result = await _userService.AddUserRoleAsync(request.Email, request.Role);
-            if (result)
-            {
-                return Ok();
-            }
-            _logger.LogWarning("Role assignment failed for email: {Email} and role: {Role}", request.Email, request.Role);
-            return StatusCode(500);
-        }
-        [Authorize(Roles = nameof(UserRole.Admin))]
         [HttpPost("create-role")]
         public async Task<IActionResult> CreateRole(UserRoleCreationRequest request)
         {
@@ -65,7 +53,19 @@ namespace TaskFlow.Api.Controllers
             _logger.LogWarning("Role creation failed for role: {Role}", request.Role.ToString());
             return StatusCode(500);
         }
-        [Authorize(Roles = nameof(UserRole.Admin))]
+        //[Authorize(Roles = nameof(UserRole.Admin))]
+        [HttpPost("assign-role")]
+        public async Task<IActionResult> AssignRole(UserRoleAssignmentRequest request)
+        {
+            var result = await _userService.AddUserRoleAsync(request.Email, request.Role);
+            if (result)
+            {
+                return Ok();
+            }
+            _logger.LogWarning("Role assignment failed for email: {Email} and role: {Role}", request.Email, request.Role);
+            return StatusCode(500);
+        }
+        //[Authorize(Roles = nameof(UserRole.Admin))]
         [HttpPost("unassign-role")]
         public async Task<IActionResult> UnassignRole(UserRoleAssignmentRequest request)
         {

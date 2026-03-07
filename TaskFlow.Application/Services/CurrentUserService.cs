@@ -8,7 +8,7 @@ namespace TaskFlow.Application.Services
          private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     
          public string? UserId => _httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value;
-         public string? OrganizationId => _httpContextAccessor.HttpContext?.User.FindFirst("OrganizationId")?.Value;
+         public string? UserRole => _httpContextAccessor.HttpContext?.User.FindFirst("role")?.Value;
 
     }
 }

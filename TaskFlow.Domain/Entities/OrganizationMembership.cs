@@ -1,6 +1,6 @@
 ﻿namespace TaskFlow.Domain.Entities
 {
-    public class OrganizationUserRole
+    public class OrganizationMembership
     {
         public int Id { get; set; }
         public ICollection<OrganizationRole> OrganizationRoles { get; set; } = default!;

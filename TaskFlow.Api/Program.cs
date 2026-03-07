@@ -42,6 +42,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IOrganizationMembershipRepository, OrganizationMembershipRepository>();
+builder.Services.AddScoped<IOrganizationMembershipService, OrganizationMembershipService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Program.cs
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));

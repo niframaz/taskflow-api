@@ -30,6 +30,10 @@ namespace TaskFlow.Application.Services
             var success = await _repository.SaveChangesAsync();
             return success;
         }
+        public async Task<IEnumerable<Organization>> GetAllForUserAsync()
+        {
+            return await _repository.GetAllForUserAsync(_currentUserService.UserId!);
+        }
         public async Task<bool> UpdateAsync(int id, Organization organization)
         {
             organization.Id = id;

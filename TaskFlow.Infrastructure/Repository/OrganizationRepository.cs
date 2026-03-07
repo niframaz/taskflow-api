@@ -1,4 +1,5 @@
-﻿using TaskFlow.Application.Abstractions;
+﻿using Microsoft.EntityFrameworkCore;
+using TaskFlow.Application.Abstractions;
 using TaskFlow.Domain.Entities;
 using TaskFlow.Infrastructure.Data;
 
@@ -12,6 +13,10 @@ namespace TaskFlow.Infrastructure.Repository
             _dbContext.Attach(organization);
             _dbContext.Entry(organization).Property(t => t.Name).IsModified = true;
             _dbContext.Entry(organization).Property(t => t.Description).IsModified = true;
+        }
+        public async Task<IEnumerable<Organization>> GetAllForUserAsync(string userId)
+        {
+            return await _dbContext.Organizations.Where(o => o.OrganizationMemberships.Any(m => m.UserId == userId)).ToListAsync();
         }
     }
 }

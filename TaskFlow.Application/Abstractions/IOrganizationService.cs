@@ -7,5 +7,6 @@ namespace TaskFlow.Application.Abstractions
     {
         Task<bool> UpdateAsync(int id, Organization organization);
         Task<bool> AddWithUserAsync(Organization organization);
+        Task<IEnumerable<Organization>> GetAllForUserAsync();
     }
 }

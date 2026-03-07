@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using TaskFlow.Api.Contracts;
 using TaskFlow.Application.Abstractions;
 using TaskFlow.Domain.Entities;
@@ -21,8 +20,8 @@ namespace TaskFlow.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Organization>>> Get()
         {
-            var result = await _service.GetAllAsync();
-            return Ok(result); ;
+            var result = await _service.GetAllForUserAsync();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]

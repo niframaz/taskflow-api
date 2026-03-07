@@ -6,7 +6,7 @@ namespace TaskFlow.Domain.Entities
     {
         public int Id { get; set; }
         public required OrgRole Role { get; set; }
-        public OrganizationMembership OrganizationMembership { get; set; } = default!;
-        public int OrganizationMembershipId { get; set; }
+        public Membership Membership { get; set; } = default!;
+        public int MembershipId { get; set; }
     }
 }

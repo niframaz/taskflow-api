@@ -5,12 +5,12 @@ using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Repository
 {
-    public class OrganizationMembershipRepository(AppDbContext dbContext) : Repository<OrganizationMembership>(dbContext), IOrganizationMembershipRepository
+    public class MembershipRepository(AppDbContext dbContext) : Repository<Membership>(dbContext), IMembershipRepository
     {
         private readonly AppDbContext _dbContext = dbContext;
-        public async Task<List<OrganizationMembership>> GetUserMembershipsAsync(string userId)
+        public async Task<List<Membership>> GetUserMembershipsAsync(string userId)
         {
-            return await _dbContext.OrganizationMemberships
+            return await _dbContext.Memberships
                 .AsNoTracking()
                 .Where(x => x.UserId == userId)
                 .Include(x => x.OrganizationRoles)

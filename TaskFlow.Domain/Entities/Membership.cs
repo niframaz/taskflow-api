@@ -1,6 +1,6 @@
 ﻿namespace TaskFlow.Domain.Entities
 {
-    public class OrganizationMembership
+    public class Membership
     {
         public int Id { get; set; }
         public ICollection<OrganizationRole> OrganizationRoles { get; set; } = [];

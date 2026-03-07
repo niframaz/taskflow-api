@@ -1,12 +1,14 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using TaskFlow.Application.Abstractions;
+using TaskFlow.Domain.Entities;
 
 namespace TaskFlow.Application.Services
 {
-    public class OrganizationMembershipService(IMemoryCache cache, IOrganizationMembershipRepository repository) : IOrganizationMembershipService
+    public class MembershipService(IMemoryCache cache, IMembershipRepository repository) : EntityService<Membership>(repository), IMembershipService
     {
         private readonly IMemoryCache _cache = cache;
-        private readonly IOrganizationMembershipRepository _repository = repository;
+        private readonly IMembershipRepository _repository = repository;
+
         public async Task<Dictionary<int, List<string>>> GetUserOrgRolesAsync(string userId)
         {
             var cacheKey = $"UserOrgRoles_{userId}";

@@ -10,7 +10,7 @@ namespace TaskFlow.Infrastructure.Data
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<Comment> Comments { get; set; }
-        public DbSet<OrganizationMembership> OrganizationMemberships { get; set; }
+        public DbSet<Membership> Memberships { get; set; }
         public DbSet<CommentReaction> CommentReactions { get; set; }
         public DbSet<TaskReaction> TaskReactions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -22,7 +22,7 @@ namespace TaskFlow.Infrastructure.Data
                 .WithMany(p => p.Users);
 
             modelBuilder.Entity<ApplicationUser>()
-                .HasMany(u => u.OrganizationMemberships)
+                .HasMany(u => u.Memberships)
                 .WithOne(t => t.User)
                 .HasForeignKey(t => t.UserId)
                 .IsRequired()
@@ -83,17 +83,17 @@ namespace TaskFlow.Infrastructure.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            modelBuilder.Entity<OrganizationMembership>()
+            modelBuilder.Entity<Membership>()
                 .HasOne(or => or.Organization)
-                .WithMany(m => m.OrganizationMemberships)
+                .WithMany(m => m.Memberships)
                 .HasForeignKey(o => o.OrganizationId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<OrganizationRole>()
-                .HasOne(or => or.OrganizationMembership)
+                .HasOne(or => or.Membership)
                 .WithMany(or => or.OrganizationRoles)
-                .HasForeignKey(o => o.OrganizationMembershipId)
+                .HasForeignKey(o => o.MembershipId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -105,32 +105,23 @@ namespace TaskFlow.Infrastructure.Data
                 .HasIndex(cr => new { cr.CommentId, cr.UserId })
                 .IsUnique();
 
-            modelBuilder.Entity<OrganizationMembership>()
+            modelBuilder.Entity<Membership>()
                 .HasIndex(cr => new { cr.OrganizationId, cr.UserId })
                 .IsUnique();
 
             modelBuilder.Entity<OrganizationRole>()
-                .HasIndex(cr => new { cr.OrganizationMembershipId, cr.Role })
+                .HasIndex(cr => new { cr.MembershipId, cr.Role })
                 .IsUnique();
 
             modelBuilder.Entity<TaskItem>()
                 .HasIndex(t => new { t.ProjectId, t.Title });
 
-            //modelBuilder.Entity<Organization>().HasData(new Organization
-            //{
-            //    Id = 1,
-            //    Name = "Acme Corp",
-            //    Description = "Sample organization for seeding"
-            //});
-
-            //modelBuilder.Entity<Project>().HasData(new Project
-            //{
-            //    Id = 1,
-            //    Name = "Project Alpha",
-            //    Description = "Sample project",
-            //    OrganizationId = 1,
-            //    Organization = null!
-            //});
+            modelBuilder.Entity<Organization>().HasData(new Organization
+            {
+                Id = 1,
+                Name = "Acme Corp",
+                Description = "Sample organization for seeding"
+            });
         }
     }
 }

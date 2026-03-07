@@ -4,19 +4,18 @@ using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Application.Services
 {
-    public class OrganizationService(IOrganizationRepository repository, IUserRepository userRepository, ICurrentUserService currentUserService,
-        IOrganizationMembershipRepository membershipRepository) : 
+    public class OrganizationService(IOrganizationRepository repository, IUserService userService,
+        IMembershipService membershipService) : 
         EntityService<Organization>(repository), IOrganizationService
     {
         private readonly IOrganizationRepository _repository = repository;
-        private readonly IUserRepository _userRepository = userRepository;
-        private readonly ICurrentUserService _currentUserService = currentUserService;
-        private readonly IOrganizationMembershipRepository _membershipRepository = membershipRepository;
+        private readonly IUserService _userService = userService;
+        private readonly IMembershipService _membershipService = membershipService;
 
         public async Task<bool> AddWithUserAsync(Organization organization)
         {
-            var user = await _userRepository.GetUserByIdAsync(_currentUserService.UserId!);
-            _membershipRepository.Add(new OrganizationMembership
+            var user = await _userService.GetLoggedUserAsync();
+            await _membershipService.AddAsync(new Membership
             { 
                 Organization = organization, 
                 User = user!,
@@ -32,10 +31,15 @@ namespace TaskFlow.Application.Services
         }
         public async Task<IEnumerable<Organization>> GetAllForUserAsync()
         {
-            return await _repository.GetAllForUserAsync(_currentUserService.UserId!);
+            return await _repository.GetAllForUserAsync(_userService.LoggedUserId!);
         }
         public async Task<bool> UpdateAsync(int id, Organization organization)
         {
+            var memberships = await _membershipService.GetUserOrgRolesAsync(_userService.LoggedUserId!);
+            if (!memberships.Any(m => m.Key == id))
+            {
+                throw new UnauthorizedAccessException("User does not have access to this organization.");
+            }
             organization.Id = id;
             _repository.Attach(organization);
             return await _repository.SaveChangesAsync();

@@ -10,5 +10,10 @@ namespace TaskFlow.Application.Abstractions
         Task<bool> AddUserRoleAsync(string email, UserRole role);
         Task<bool> CreateRoleAsync(UserRole role);
         Task<bool> RemoveUserRoleAsync(string email, UserRole role);
+        Task<ApplicationUser> GetUserByIdAsync(string userId);
+        Task<ApplicationUser> GetLoggedUserAsync();
+        void InvalidateLoggedUserCache();
+        public string? LoggedUserId { get; }
+
     }
 }

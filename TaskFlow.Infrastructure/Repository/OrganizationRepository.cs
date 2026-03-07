@@ -16,7 +16,7 @@ namespace TaskFlow.Infrastructure.Repository
         }
         public async Task<IEnumerable<Organization>> GetAllForUserAsync(string userId)
         {
-            return await _dbContext.Organizations.Where(o => o.OrganizationMemberships.Any(m => m.UserId == userId)).ToListAsync();
+            return await _dbContext.Organizations.Where(o => o.Memberships.Any(m => m.UserId == userId)).ToListAsync();
         }
     }
 }

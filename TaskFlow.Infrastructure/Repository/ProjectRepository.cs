@@ -4,14 +4,14 @@ using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Repository
 {
-    public class ProjectRepository(AppDbContext dbContext) : Repository<Project>(dbContext), IProjectRepository
+    public class ProjectRepository(AppDbContext context) : Repository<Project>(context), IProjectRepository
     {
-        private readonly AppDbContext _dbContext = dbContext;
         public void Attach(Project project)
         {
-            _dbContext.Attach(project);
-            _dbContext.Entry(project).Property(t => t.Name).IsModified = true;
-            _dbContext.Entry(project).Property(t => t.Description).IsModified = true;
+            var entry = _dbSet.Entry(project);
+
+            entry.Property(o => o.Name).IsModified = true;
+            entry.Property(o => o.Description).IsModified = true;
         }
     }
 }

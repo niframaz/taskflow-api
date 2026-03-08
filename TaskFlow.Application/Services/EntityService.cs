@@ -2,7 +2,7 @@
 
 namespace TaskFlow.Application.Services
 {
-    public class EntityService<T>(IRepository<T> repository) : IEntityService<T> where T : class
+    public abstract class EntityService<T>(IRepository<T> repository) : IEntityService<T> where T : class
     {
         private readonly IRepository<T> _repository = repository;
         public virtual async Task<bool> AddAsync(T entity)

@@ -12,39 +12,27 @@ namespace TaskFlow.Application.Services
         private readonly IMembershipRepository _repository = repository;
         private readonly IUserService _userService = userService;
 
-        public async Task<Dictionary<int, List<string>>> GetUserOrgRolesAsync(string? userId = null)
+        private string GetMembershipCacheKey(string userId) => $"Membership_{userId}";
+        public async Task<List<Membership>> GetUserMembershipsAsync(string? userId = null)
         {
             userId ??= _userService.LoggedUserId;
-
-            var cacheKey = $"UserOrgRoles_{userId}";
-
+            var cacheKey = GetMembershipCacheKey(userId!);
             return (await _cache.GetOrCreateAsync(cacheKey, async entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);//add to appsettings
-
-                var memberships = await GetUserMembershipsAsync(userId!);
-
-                return memberships.ToDictionary(
-                    m => m.OrganizationId,
-                    m => m.OrganizationRoles.Select(r => r.Role.ToString()).ToList()
-                );
+                var result = await _repository.GetUserMembershipsAsync(userId!);
+                return result;
             }))!;
         }
-
-        public void InvalidateUserOrgRolesCache(string userId)
+        public void InvalidateMembership(string? userId = null)
         {
-            _cache.Remove($"UserOrgRoles_{userId}");
-        }
-
-        public async Task<List<Membership>> GetUserMembershipsAsync(string? userId = null)
-        {
-            var result = await _repository.GetUserMembershipsAsync(userId ?? _userService.LoggedUserId!);
-            return result;
+            userId ??= _userService.LoggedUserId;
+            _cache.Remove(GetMembershipCacheKey(userId!));
         }
         public async Task<bool> LoggedUserIsAdminAndHasAccessToOrgAsync(int id)
         {
-            var memberships = await GetUserOrgRolesAsync();
-            return memberships.Any(m => m.Key == id && m.Value.Contains(OrgRole.Admin.ToString()));
+            var memberships = await GetUserMembershipsAsync();
+            return memberships.Any(m => m.OrganizationId == id && m.OrganizationRoles.Any(x => x.Role == OrgRole.Admin));
         }
     }
 }

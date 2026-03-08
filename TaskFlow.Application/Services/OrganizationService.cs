@@ -14,11 +14,11 @@ namespace TaskFlow.Application.Services
 
         public async override Task<IEnumerable<Organization>> GetAllAsync()
         {
-            return await _repository.GetAllForUserAsync(_userService.LoggedUserId!);
+            return await _repository.GetAllAsync(_userService.LoggedUserId!);
         }
         public async override Task<Organization?> GetAsync(int id)
         {
-            return await _repository.GetForUserAsync(_userService.LoggedUserId!, id);
+            return await _repository.GetAsync(id, _userService.LoggedUserId!);
         }
         public async override Task<bool> AddAsync(Organization organization)
         {

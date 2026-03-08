@@ -4,33 +4,33 @@ using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Repository
 {
-    public abstract class Repository<T>(AppDbContext dbContext) : IRepository<T> where T : class
+    public abstract class Repository<T>(AppDbContext context) : IRepository<T> where T : class
     {
-        private readonly AppDbContext _dbContext = dbContext;
-        private readonly DbSet<T> _dbSet = dbContext.Set<T>();
+        protected readonly AppDbContext _context = context;
+        protected readonly DbSet<T> _dbSet = context.Set<T>();
 
-        public void Add(T entity)
+        public virtual void Add(T entity)
         {
-            _dbContext.Add(entity);
+            _dbSet.Add(entity);
         }
 
-        public async Task<T?> GetAsync(int id)
+        public virtual async Task<T?> GetAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();
         }
 
-        public void Remove(T entity)
+        public virtual void Remove(T entity)
         {
             _dbSet.Remove(entity);
         }
-        public async Task<bool> SaveChangesAsync()
+        public virtual async Task<bool> SaveChangesAsync()
         {
-            var result = await _dbContext.SaveChangesAsync();
+            var result = await _context.SaveChangesAsync();
             return result > 0;
         }
     }

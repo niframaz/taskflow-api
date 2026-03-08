@@ -5,7 +5,7 @@ namespace TaskFlow.Application.Abstractions
     public interface IOrganizationRepository : IRepository<Organization>
     {
         void Attach(Organization organization);
-        Task<IEnumerable<Organization>> GetAllForUserAsync(string userId);
-        Task<Organization?> GetForUserAsync(string userId, int id);
+        Task<Organization?> GetAsync(int id, string userId);
+        Task<IEnumerable<Organization>> GetAllAsync(string userId);
     }
 }

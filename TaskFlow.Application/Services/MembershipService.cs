@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using TaskFlow.Application.Abstractions;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Application.Services
 {
-    public class MembershipService(IMemoryCache cache, IMembershipRepository repository, IUserService userService) : EntityService<Membership>(repository), IMembershipService
+    public class MembershipService(IMemoryCache cache, IMembershipRepository repository, IUserService userService) : EntityService<Membership>(repository), 
+        IMembershipService
     {
         private readonly IMemoryCache _cache = cache;
         private readonly IMembershipRepository _repository = repository;
@@ -20,7 +22,7 @@ namespace TaskFlow.Application.Services
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);//add to appsettings
 
-                var memberships = await _repository.GetUserMembershipsAsync(userId!);
+                var memberships = await GetUserMembershipsAsync(userId!);
 
                 return memberships.ToDictionary(
                     m => m.OrganizationId,
@@ -38,6 +40,11 @@ namespace TaskFlow.Application.Services
         {
             var result = await _repository.GetUserMembershipsAsync(userId ?? _userService.LoggedUserId!);
             return result;
+        }
+        public async Task<bool> LoggedUserIsAdminAndHasAccessToOrgAsync(int id)
+        {
+            var memberships = await GetUserOrgRolesAsync();
+            return memberships.Any(m => m.Key == id && m.Value.Contains(OrgRole.Admin.ToString()));
         }
     }
 }

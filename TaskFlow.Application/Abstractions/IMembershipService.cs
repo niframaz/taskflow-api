@@ -7,5 +7,6 @@ namespace TaskFlow.Application.Abstractions
         Task<Dictionary<int, List<string>>> GetUserOrgRolesAsync(string? userId = null);
         void InvalidateUserOrgRolesCache(string userId);
         Task<List<Membership>> GetUserMembershipsAsync(string? userId = null);
+        Task<bool> LoggedUserIsAdminAndHasAccessToOrgAsync(int id);
     }
 }

@@ -18,5 +18,9 @@ namespace TaskFlow.Infrastructure.Repository
         {
             return await _dbContext.Organizations.Where(o => o.Memberships.Any(m => m.UserId == userId)).ToListAsync();
         }
+        public async Task<Organization?> GetForUserAsync(string userId, int id)
+        {
+            return await _dbContext.Organizations.FirstOrDefaultAsync(o => o.Id == id && o.Memberships.Any(m => m.UserId == userId));
+        }
     }
 }

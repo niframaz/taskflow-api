@@ -6,5 +6,6 @@ namespace TaskFlow.Application.Abstractions
     {
         void Attach(Organization organization);
         Task<IEnumerable<Organization>> GetAllForUserAsync(string userId);
+        Task<Organization?> GetForUserAsync(string userId, int id);
     }
 }

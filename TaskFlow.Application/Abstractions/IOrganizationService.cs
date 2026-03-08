@@ -6,7 +6,7 @@ namespace TaskFlow.Application.Abstractions
     public interface IOrganizationService : IEntityService<Organization>
     {
         Task<bool> UpdateAsync(int id, Organization organization);
-        Task<bool> AddWithUserAsync(Organization organization);
-        Task<IEnumerable<Organization>> GetAllForUserAsync();
+        Task<bool> AddAsync(Organization organization);
+        Task<IEnumerable<Organization>> GetAllAsync();
     }
 }

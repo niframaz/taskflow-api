@@ -20,7 +20,7 @@ namespace TaskFlow.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Organization>>> Get()
         {
-            var result = await _service.GetAllForUserAsync();
+            var result = await _service.GetAllAsync();
             return Ok(result);
         }
 
@@ -39,7 +39,7 @@ namespace TaskFlow.Api.Controllers
         public async Task<IActionResult> Post([FromBody] OrganizationRequest request)
         {
             var org = _mapper.Map<Organization>(request);
-            var result = await _service.AddWithUserAsync(org);
+            var result = await _service.AddAsync(org);
             if(result)
             {
                 var orgDto = _mapper.Map<OrganizationResponse>(org);

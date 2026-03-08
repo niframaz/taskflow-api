@@ -55,7 +55,6 @@ namespace TaskFlow.Api.Controllers
             return StatusCode(500);
         }
 
-        //[Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

@@ -17,7 +17,7 @@ namespace TaskFlow.Api.Controllers
         private readonly IMembershipService _service = service;
         private readonly IMapper _mapper = mapper;
         // GET: api/<MembershipController>
-        [HttpGet]
+        [HttpGet("my-memberships")]
         public async Task<ActionResult<IEnumerable<Membership>>> Get()
         {
             var result = await _service.GetUserMembershipsAsync();
@@ -26,10 +26,14 @@ namespace TaskFlow.Api.Controllers
         }
 
         // GET api/<MembershipController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("my-membership-for-org/{organizationId}")]
+        public async Task<ActionResult<Membership?>> Get(int organizationId)
         {
-            return "value";
+            var result = await _service.GetUserMembershipForOrgAsync(organizationId);
+            if (result == null)
+                return NotFound();
+            var response = _mapper.Map<MembershipResponse>(result);
+            return Ok(response);
         }
 
         // POST api/<MembershipController>

@@ -14,15 +14,15 @@ namespace TaskFlow.Application.Services
 
         public async override Task<IEnumerable<Organization>> GetAllAsync()
         {
-            return await _repository.GetAllAsync(_userService.LoggedUserId!);
+            return await _repository.GetAllAsync(_userService.MyId!);
         }
         public async override Task<Organization?> GetAsync(int id)
         {
-            return await _repository.GetAsync(id, _userService.LoggedUserId!);
+            return await _repository.GetAsync(id, _userService.MyId!);
         }
         public async override Task<bool> AddAsync(Organization organization)
         {
-            var user = await _userService.GetLoggedUserAsync();
+            var user = await _userService.GetMeAsync();
             var success = await _membershipService.AddAsync(new Membership
             {
                 Organization = organization,
@@ -34,26 +34,26 @@ namespace TaskFlow.Application.Services
                     }
                 ]
             });
-            _userService.InvalidateLoggedUserCache();
+            _userService.InvalidateMyCache();
             return success;
         }
 
         public async Task<bool> UpdateAsync(int id, Organization organization)
         {
-            if (await _membershipService.LoggedUserIsAdminAndHasAccessToOrgAsync(id))
+            if (await _membershipService.IAmAdminAndHasAccessToOrgAsync(id))
             {
                 organization.Id = id;
                 _repository.Attach(organization);
-                _userService.InvalidateLoggedUserCache();
+                _userService.InvalidateMyCache();
                 return await _repository.SaveChangesAsync();
             }
             throw new UnauthorizedAccessException("User does not have access to this organization.");
         }
         public async override Task<bool> RemoveAsync(int id)
         {
-            if (await _membershipService.LoggedUserIsAdminAndHasAccessToOrgAsync(id))
+            if (await _membershipService.IAmAdminAndHasAccessToOrgAsync(id))
             {
-                _userService.InvalidateLoggedUserCache();
+                _userService.InvalidateMyCache();
                 return await base.RemoveAsync(id);                
             }
             throw new UnauthorizedAccessException("User does not have access to this organization.");

@@ -13,7 +13,15 @@ namespace TaskFlow.Infrastructure.Repository
                 .AsNoTracking()
                 .Where(x => x.UserId == userId)
                 .Include(x => x.OrganizationRoles)
+                .Include(x => x.User)
                 .ToListAsync();
+        }
+        public async Task<Membership?> GetUserMembershipForOrgAsync(int organizationId, string userId)
+        {
+            return await _dbSet
+                .Include(x => x.OrganizationRoles)
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.OrganizationId == organizationId);
         }
     }
 }

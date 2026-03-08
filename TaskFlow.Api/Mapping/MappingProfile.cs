@@ -15,7 +15,8 @@ namespace TaskFlow.Api.Mapping
             CreateMap<Organization, OrganizationResponse>();
 
             CreateMap<Membership, MembershipResponse>()
-           .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.OrganizationRoles));
+            .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.OrganizationRoles))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email));
 
             CreateMap<OrganizationRole, OrganizationRoleDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Role));

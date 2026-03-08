@@ -16,24 +16,24 @@ namespace TaskFlow.Application.Services
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly IMemoryCache _cache = cache;
 
-        public string? LoggedUserId => _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        public string? MyId => _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        public async Task<ApplicationUser> GetLoggedUserAsync()
+        public async Task<ApplicationUser> GetMeAsync()
         {
-            var cacheKey = $"CurrentUser_{LoggedUserId}";
+            var cacheKey = $"CurrentUser_{MyId}";
 
             return (await _cache.GetOrCreateAsync(cacheKey, async entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);//add to appsettings
 
-                var user = await _repository.GetUserByIdAsync(LoggedUserId!);
+                var user = await _repository.GetUserByIdAsync(MyId!);
 
                 return user;
             }))!;
         }
-        public void InvalidateLoggedUserCache()
+        public void InvalidateMyCache()
         {
-            _cache.Remove($"CurrentUser_{LoggedUserId}");
+            _cache.Remove($"CurrentUser_{MyId}");
         }
         public async Task<string?> RegisterAsync(ApplicationUser user, string password)
         {

@@ -19,7 +19,7 @@ namespace TaskFlow.Application.Services
 
         public async Task<List<Membership>> GetUserMembershipsAsync(string? userId = null)
         {
-            userId ??= _userService.LoggedUserId;
+            userId ??= _userService.MyId;
             var cacheKey = GetMembershipCacheKey(userId!);
             return (await _cache.GetOrCreateAsync(cacheKey, async entry =>
             {
@@ -30,13 +30,18 @@ namespace TaskFlow.Application.Services
         }
         public void InvalidateMembership(string? userId = null)
         {
-            userId ??= _userService.LoggedUserId;
+            userId ??= _userService.MyId;
             _cache.Remove(GetMembershipCacheKey(userId!));
         }
-        public async Task<bool> LoggedUserIsAdminAndHasAccessToOrgAsync(int id)
+        public async Task<bool> IAmAdminAndHasAccessToOrgAsync(int id)
         {
             var memberships = await GetUserMembershipsAsync();
             return memberships.Any(m => m.OrganizationId == id && m.OrganizationRoles.Any(x => x.Role == OrgRole.Admin));
+        }
+        public async Task<Membership?> GetUserMembershipForOrgAsync(int organizationId, string? userId = null)
+        {
+            userId ??= _userService.MyId;
+            return await _repository.GetUserMembershipForOrgAsync(organizationId, userId!);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Api.Contracts
@@ -8,7 +9,8 @@ namespace TaskFlow.Api.Contracts
         [EmailAddress]
         public required string Email { get; set; }
         public required int OrganizationId { get; set; }
-        [EnumDataType(typeof(OrgRole))]
+        [EnumDataType(typeof(UserRole))]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public required OrgRole Role { get; set; }
     }
 }

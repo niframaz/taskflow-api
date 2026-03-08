@@ -1,4 +1,5 @@
-﻿using TaskFlow.Domain.Enums;
+﻿using System.Text.Json.Serialization;
+using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Api.Contracts
 {
@@ -13,6 +14,8 @@ namespace TaskFlow.Api.Contracts
     {
         public int OrganizationRoleId { get; set; }
         public int MembershipId { get; set; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public OrgRole RoleName { get; set; } = default!;
     }
 }

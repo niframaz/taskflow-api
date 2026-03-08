@@ -115,13 +115,6 @@ namespace TaskFlow.Infrastructure.Data
 
             modelBuilder.Entity<TaskItem>()
                 .HasIndex(t => new { t.ProjectId, t.Title });
-
-            modelBuilder.Entity<Organization>().HasData(new Organization
-            {
-                Id = 1,
-                Name = "Acme Corp",
-                Description = "Sample organization for seeding"
-            });
         }
     }
 }

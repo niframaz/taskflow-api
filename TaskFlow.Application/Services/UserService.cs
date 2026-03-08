@@ -8,12 +8,11 @@ using TaskFlow.Domain.Enums;
 namespace TaskFlow.Application.Services
 {
     public class UserService(IUserRepository repository, IJwtService jwtService, IUnitOfWork unitOfWork, 
-        IMembershipService membershipService, IHttpContextAccessor httpContextAccessor, IMemoryCache cache) : IUserService
+        IHttpContextAccessor httpContextAccessor, IMemoryCache cache) : IUserService
     {
         private readonly IUserRepository _repository = repository;
         private readonly IJwtService _jwtService = jwtService;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
-        private readonly IMembershipService _membershipService = membershipService;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly IMemoryCache _cache = cache;
 
@@ -73,26 +72,6 @@ namespace TaskFlow.Application.Services
             }
             return null;
         }
-        public async Task<bool> AddUserRoleAsync(string email, UserRole role)
-        {
-            //var currentUserRole = int.Parse(_currentUser.UserRole!);
-            //if (currentUserRole != (int)UserRole.Admin)
-            //    throw new UnauthorizedAccessException("Only admin in the organization can assign roles");
-
-            var currentUserMembership = await _membershipService.GetUserOrgRolesAsync(LoggedUserId!);
-
-            var user = await _repository.GetUserByEmailAsync(email);
-
-            if (user is not null)
-            {
-                //var userOrg = user.Organizations.Select(o => o.Id);
-
-                var result = await _repository.AddUserToRoleAsync(user, role.ToString());
-                return result;
-            }
-            return false;
-        }
-
         public async Task<bool> RemoveUserRoleAsync(string email, UserRole role)
         {
             var user = await _repository.GetUserByEmailAsync(email);

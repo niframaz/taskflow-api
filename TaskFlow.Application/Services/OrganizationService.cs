@@ -15,7 +15,7 @@ namespace TaskFlow.Application.Services
         public async Task<bool> AddWithUserAsync(Organization organization)
         {
             var user = await _userService.GetLoggedUserAsync();
-            await _membershipService.AddAsync(new Membership
+            var success = await _membershipService.AddAsync(new Membership
             { 
                 Organization = organization, 
                 User = user!,
@@ -26,7 +26,7 @@ namespace TaskFlow.Application.Services
                     }
                 ]
             });
-            var success = await _repository.SaveChangesAsync();
+            _userService.InvalidateLoggedUserCache();
             return success;
         }
         public async Task<IEnumerable<Organization>> GetAllForUserAsync()

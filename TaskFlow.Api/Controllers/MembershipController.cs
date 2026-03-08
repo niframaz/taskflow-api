@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaskFlow.Api.Contracts;
 using TaskFlow.Application.Abstractions;
+using TaskFlow.Domain.Entities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -9,15 +12,17 @@ namespace TaskFlow.Api.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class MembershipController(IMembershipService service) : ControllerBase
+    public class MembershipController(IMembershipService service, IMapper mapper) : ControllerBase
     {
         private readonly IMembershipService _service = service;
+        private readonly IMapper _mapper = mapper;
         // GET: api/<MembershipController>
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<Membership>>> Get()
         {
             var result = await _service.GetUserMembershipsAsync();
-            return Ok(result);
+            var response = _mapper.Map<List<MembershipResponse>>(result);
+            return Ok(response);
         }
 
         // GET api/<MembershipController>/5

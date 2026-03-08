@@ -44,6 +44,7 @@ namespace TaskFlow.Application.Services
             {
                 organization.Id = id;
                 _repository.Attach(organization);
+                _userService.InvalidateLoggedUserCache();
                 return await _repository.SaveChangesAsync();
             }
             throw new UnauthorizedAccessException("User does not have access to this organization.");
@@ -52,6 +53,7 @@ namespace TaskFlow.Application.Services
         {
             if (await _membershipService.LoggedUserIsAdminAndHasAccessToOrgAsync(id))
             {
+                _userService.InvalidateLoggedUserCache();
                 return await base.RemoveAsync(id);                
             }
             throw new UnauthorizedAccessException("User does not have access to this organization.");

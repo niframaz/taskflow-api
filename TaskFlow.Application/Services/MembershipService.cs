@@ -12,7 +12,11 @@ namespace TaskFlow.Application.Services
         private readonly IMembershipRepository _repository = repository;
         private readonly IUserService _userService = userService;
 
-        private string GetMembershipCacheKey(string userId) => $"Membership_{userId}";
+        private static string GetMembershipCacheKey(string userId)
+        {
+            return $"Membership_{userId}";
+        }
+
         public async Task<List<Membership>> GetUserMembershipsAsync(string? userId = null)
         {
             userId ??= _userService.LoggedUserId;

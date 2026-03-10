@@ -8,6 +8,7 @@ namespace TaskFlow.Api.Contracts
         public int Id { get; set; }
         public int OrganizationId { get; set; }
         public string Email { get; set; } = default!;
+        public string UserId { get; set; } = default!;
         public List<OrganizationRoleDto> Roles { get; set; } = [];
     }
 

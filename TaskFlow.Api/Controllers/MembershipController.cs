@@ -9,23 +9,23 @@ using TaskFlow.Application.Abstractions;
 namespace TaskFlow.Api.Controllers
 {
     [Authorize]
-    [Route("api")]
+    [Route("api/[controller]")]
     [ApiController]
     public class MembershipController(IMembershipService service, IMapper mapper) : ControllerBase
     {
         private readonly IMembershipService _service = service;
         private readonly IMapper _mapper = mapper;
 
-        [HttpGet("my-memberships")]
-        public async Task<ActionResult<IEnumerable<MembershipResponse>>> Get()
+        [HttpGet()]
+        public async Task<ActionResult<IEnumerable<MembershipResponse>>> GetUserMemberships()
         {
             var result = await _service.GetUserMembershipsAsync();
             var response = _mapper.Map<List<MembershipResponse>>(result);
             return Ok(response);
         }
 
-        [HttpGet("my-membership-for-org/{organizationId}")]
-        public async Task<ActionResult<MembershipResponse?>> Get(int organizationId)
+        [HttpGet("{organizationId}")]
+        public async Task<ActionResult<MembershipResponse?>> GetUserMembershipForOrganization(int organizationId)
         {
             var result = await _service.GetUserMembershipForOrgAsync(organizationId);
             if (result == null)
@@ -33,20 +33,24 @@ namespace TaskFlow.Api.Controllers
             var response = _mapper.Map<MembershipResponse>(result);
             return Ok(response);
         }
-        [HttpGet("all-memberships-for-org/{organizationId}")]
-        public async Task<ActionResult<IEnumerable<MembershipResponse>>> GetAllForOrg(int organizationId)
+        [HttpGet("{organizationId}/all")]
+        public async Task<ActionResult<IEnumerable<MembershipResponse>>> GetAllMembershipsForOrganization(int organizationId)
         {
             var result = await _service.GetAllMembershipsForMyOrgAsync(organizationId);
             var response = _mapper.Map<List<MembershipResponse>>(result);
             return Ok(response);
         }
-        [HttpPut("add-membership")]
-        public async Task<ActionResult> AddMembership(MembershipRequest request)
+        [HttpPost("roles")]
+        public async Task<ActionResult> AddMembershipRole(MembershipRequest request)
         {
-            var result = await _service.AddMembershipAsync(request.OrganizationId, request.Email, request.Role);
+            var result = await _service.AddMembershipRoleAsync(request.OrganizationId, request.UserId, request.Role);
             if (!result)
                 return BadRequest();
-            return NoContent();
+            return CreatedAtAction(
+                nameof(GetAllMembershipsForOrganization),
+                new { organizationId = request.OrganizationId },
+                request
+            );
         }
     }
 }

@@ -49,19 +49,19 @@ namespace TaskFlow.Application.Services
                 ? throw new UnauthorizedAccessException("User does not have access to this organization.")
                 : await _repository.GetMembershipsForOrgAsync(orgId);
         }
-        public async Task<bool> AddMembershipAsync(int orgId, string email, OrgRole role)
+        public async Task<bool> AddMembershipRoleAsync(int orgId, string userId, OrgRole role)
         {
             var hasAccess = await IAmAdminAndHasAccessToOrgAsync(orgId);
             if (!hasAccess)
             {
                 throw new UnauthorizedAccessException("User does not have access to edit this member.");
             }
-            var member = await _repository.GetUserMembershipForOrgByEmailAsync(orgId, email);
+            var member = await _repository.GetUserMembershipForOrgAsync(orgId, userId);
             if(member is null)
             {
                 return false;
             }
-            _repository.AddMembershipAsync(member, role);
+            _repository.AddMembershipRoleAsync(member, role);
             InvalidateMembership(member.UserId);
             return await _repository.SaveChangesAsync();
         }

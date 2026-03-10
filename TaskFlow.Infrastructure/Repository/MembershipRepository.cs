@@ -34,6 +34,7 @@ namespace TaskFlow.Infrastructure.Repository
                 .Include(x => x.User)
                 .ToListAsync();
         }
+        //remove
         public async Task<Membership?> GetUserMembershipForOrgByEmailAsync(int organizationId, string email)
         {
             return await _dbSet
@@ -41,7 +42,7 @@ namespace TaskFlow.Infrastructure.Repository
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.OrganizationId == organizationId && x.User.Email == email);
         }
-        public void AddMembershipAsync(Membership membership, OrgRole role)
+        public void AddMembershipRoleAsync(Membership membership, OrgRole role)
         {
             var existingRole = membership.OrganizationRoles.FirstOrDefault(r => r.Role == role);
 

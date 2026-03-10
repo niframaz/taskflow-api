@@ -8,7 +8,7 @@ namespace TaskFlow.Application.Abstractions
         Task<List<Membership>> GetUserMembershipsAsync(string userId);
         Task<Membership?> GetUserMembershipForOrgAsync(int organizationId, string userId);
         Task<IList<Membership>> GetMembershipsForOrgAsync(int organizationId);
-        void AddMembershipAsync(Membership membership, OrgRole role);
+        void AddMembershipRoleAsync(Membership membership, OrgRole role);
         Task<Membership?> GetUserMembershipForOrgByEmailAsync(int organizationId, string email);
     }
 }

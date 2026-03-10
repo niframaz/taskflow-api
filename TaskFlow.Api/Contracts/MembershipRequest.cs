@@ -6,8 +6,7 @@ namespace TaskFlow.Api.Contracts
 {
     public class MembershipRequest
     {
-        [EmailAddress]
-        public required string Email { get; set; }
+        public required string UserId { get; set; }
         public required int OrganizationId { get; set; }
         [EnumDataType(typeof(OrgRole))]
         [JsonConverter(typeof(JsonStringEnumConverter))]

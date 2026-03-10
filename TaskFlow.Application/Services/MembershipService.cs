@@ -5,7 +5,7 @@ using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Application.Services
 {
-    public class MembershipService(IMemoryCache cache, IMembershipRepository repository, IUserService userService) : EntityService<Membership>(repository), 
+    public class MembershipService(IMemoryCache cache, IMembershipRepository repository, IUserService userService) : EntityService<Membership>(repository),
         IMembershipService
     {
         private readonly IMemoryCache _cache = cache;
@@ -16,7 +16,6 @@ namespace TaskFlow.Application.Services
         {
             return $"Membership_{userId}";
         }
-
         public async Task<List<Membership>> GetUserMembershipsAsync(string? userId = null)
         {
             userId ??= _userService.MyId;
@@ -42,6 +41,13 @@ namespace TaskFlow.Application.Services
         {
             userId ??= _userService.MyId;
             return await _repository.GetUserMembershipForOrgAsync(organizationId, userId!);
+        }
+        public async Task<IList<Membership>> GetAllMembershipsForMyOrgAsync(int orgId)
+        {
+            var myMembership = await GetUserMembershipForOrgAsync(orgId);
+            return myMembership is null
+                ? throw new UnauthorizedAccessException("User does not have access to this organization.")
+                : await _repository.GetMembershipsForOrgAsync(orgId);
         }
     }
 }

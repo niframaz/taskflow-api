@@ -7,7 +7,7 @@ using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Application.Services
 {
-    public class UserService(IUserRepository repository, IJwtService jwtService, IUnitOfWork unitOfWork, 
+    public class UserService(IUserRepository repository, IJwtService jwtService, IUnitOfWork unitOfWork,
         IHttpContextAccessor httpContextAccessor, IMemoryCache cache) : IUserService
     {
         private readonly IUserRepository _repository = repository;
@@ -87,7 +87,6 @@ namespace TaskFlow.Application.Services
             var result = await _repository.CreateRoleAsync(role.ToString());
             return result;
         }
-
         public async Task<ApplicationUser> GetUserByIdAsync(string userId)
         {
             var user = await _repository.GetUserByIdAsync(userId);

@@ -13,6 +13,5 @@ namespace TaskFlow.Application.Abstractions
         Task<ApplicationUser> GetUserByIdAsync(string userId);
         Task<ApplicationUser> GetMeAsync();
         void InvalidateMyCache();
-
     }
 }

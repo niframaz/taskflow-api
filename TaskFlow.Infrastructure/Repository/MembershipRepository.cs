@@ -19,9 +19,19 @@ namespace TaskFlow.Infrastructure.Repository
         public async Task<Membership?> GetUserMembershipForOrgAsync(int organizationId, string userId)
         {
             return await _dbSet
+                .AsNoTracking()
                 .Include(x => x.OrganizationRoles)
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.UserId == userId && x.OrganizationId == organizationId);
+        }
+        public async Task<IList<Membership>> GetMembershipsForOrgAsync(int organizationId)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Where(x => x.OrganizationId == organizationId)
+                .Include(x => x.OrganizationRoles.Where(o => o.Id == organizationId))
+                .Include(x => x.User)
+                .ToListAsync();
         }
     }
 }

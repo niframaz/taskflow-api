@@ -25,7 +25,7 @@ namespace TaskFlow.Api.Controllers
             var token = await _userService.RegisterAsync(appUser, user.Password);
             if (token is not null)
             {
-                return Ok(token);
+                return Ok(new { token });
             }
             _logger.LogWarning("User registration failed for email: {Email}", user.Email);
             return StatusCode(500);
@@ -36,7 +36,7 @@ namespace TaskFlow.Api.Controllers
             var token = await _userService.LoginAsync(user.Email, user.Password);
             if (token is not null)
             {
-                return Ok(token);
+                return Ok(new { token });
             }
             _logger.LogWarning("User login failed for email: {Email}", user.Email);
             return Unauthorized();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TaskFlow.Application.Abstractions;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Domain.Enums;
 using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Repository
@@ -32,6 +33,26 @@ namespace TaskFlow.Infrastructure.Repository
                 .Include(x => x.OrganizationRoles.Where(o => o.Id == organizationId))
                 .Include(x => x.User)
                 .ToListAsync();
+        }
+        public async Task<Membership?> GetUserMembershipForOrgByEmailAsync(int organizationId, string email)
+        {
+            return await _dbSet
+                .Include(x => x.OrganizationRoles)
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.OrganizationId == organizationId && x.User.Email == email);
+        }
+        public void AddMembershipAsync(Membership membership, OrgRole role)
+        {
+            var existingRole = membership.OrganizationRoles.FirstOrDefault(r => r.Role == role);
+
+            if (existingRole != null)
+            {
+                return;
+            }
+            else
+            {
+                membership.OrganizationRoles.Add(new OrganizationRole { Role = role });
+            }
         }
     }
 }

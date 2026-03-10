@@ -40,5 +40,13 @@ namespace TaskFlow.Api.Controllers
             var response = _mapper.Map<List<MembershipResponse>>(result);
             return Ok(response);
         }
+        [HttpPut("add-membership")]
+        public async Task<ActionResult> AddMembership(MembershipRequest request)
+        {
+            var result = await _service.AddMembershipAsync(request.OrganizationId, request.Email, request.Role);
+            if (!result)
+                return BadRequest();
+            return NoContent();
+        }
     }
 }

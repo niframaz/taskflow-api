@@ -9,7 +9,7 @@ namespace TaskFlow.Api.Contracts
         [EmailAddress]
         public required string Email { get; set; }
         public required int OrganizationId { get; set; }
-        [EnumDataType(typeof(UserRole))]
+        [EnumDataType(typeof(OrgRole))]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public required OrgRole Role { get; set; }
     }

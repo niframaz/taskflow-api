@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Security.Claims;
@@ -52,6 +53,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddSingleton<IJwtOptions>(sp =>
+    sp.GetRequiredService<IOptions<JwtOptions>>().Value);
 
 var jwtOptions = builder.Configuration
     .GetSection("JwtSettings")

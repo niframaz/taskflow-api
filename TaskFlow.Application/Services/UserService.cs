@@ -1,20 +1,23 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using TaskFlow.Application.Abstractions;
+using TaskFlow.Application.DTOs;
 using TaskFlow.Domain.Entities;
 using TaskFlow.Domain.Enums;
 
 namespace TaskFlow.Application.Services
 {
     public class UserService(IUserRepository repository, IJwtService jwtService, IUnitOfWork unitOfWork,
-        IHttpContextAccessor httpContextAccessor, IMemoryCache cache) : IUserService
+        IHttpContextAccessor httpContextAccessor, IMemoryCache cache, IJwtOptions jwtOptions) : IUserService
     {
         private readonly IUserRepository _repository = repository;
         private readonly IJwtService _jwtService = jwtService;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly IMemoryCache _cache = cache;
+        private readonly IJwtOptions _jwtOptions = jwtOptions;
 
         public string? MyId => _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -58,7 +61,7 @@ namespace TaskFlow.Application.Services
             var token = await _jwtService.GenerateToken(user);
             return token;
         }
-        public async Task<string?> LoginAsync(string email, string password)
+        public async Task<AuthResponseDto?> LoginAsync(string email, string password)
         {
             var user = await _repository.GetUserByEmailAsync(email);
             if (user is not null)
@@ -67,7 +70,19 @@ namespace TaskFlow.Application.Services
                 if (isValidPassword)
                 {
                     var token = await _jwtService.GenerateToken(user);
-                    return token;
+                    var reslt = new AuthResponseDto
+                    {
+                        Token = token,
+                        ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationInMinutes),
+                        User = new UserDto
+                        {
+                            Id = user.Id,
+                            Name = user.Name!,
+                            Email = user.Email!,
+                            Roles = await _repository.GetAllRolesForUserAsync(user)
+                        }
+                    };
+                    return reslt;
                 }
             }
             return null;

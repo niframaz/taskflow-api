@@ -42,5 +42,10 @@ namespace TaskFlow.Infrastructure.Repository
             var result = await _userManager.RemoveFromRoleAsync(user, role);
             return result.Succeeded;
         }
+        public async Task<IList<string>> GetAllRolesForUserAsync(ApplicationUser user)
+        {
+            var result = await _userManager.GetRolesAsync(user);
+            return result;
+        }
     }
 }

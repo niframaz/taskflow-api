@@ -11,5 +11,6 @@ namespace TaskFlow.Application.Abstractions
         Task<bool> AddUserToRoleAsync(ApplicationUser user, string role);
         Task<bool> CreateRoleAsync(string role);
         Task<bool> RemoveRoleFromUserAsync(ApplicationUser user, string role);
+        Task<IList<string>> GetAllRolesForUserAsync(ApplicationUser user);
     }
 }

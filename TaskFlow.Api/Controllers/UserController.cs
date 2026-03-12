@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Contracts;
 using TaskFlow.Application.Abstractions;
+using TaskFlow.Application.DTOs;
 using TaskFlow.Domain.Entities;
 using TaskFlow.Domain.Enums;
 
@@ -31,12 +32,12 @@ namespace TaskFlow.Api.Controllers
             return StatusCode(500);
         }
         [HttpPost("login")]
-        public async Task<IActionResult> Login(UserLoginRequest user)
+        public async Task<ActionResult<AuthResponseDto?>> Login(UserLoginRequest user)
         {
-            var token = await _userService.LoginAsync(user.Email, user.Password);
-            if (token is not null)
+            var response = await _userService.LoginAsync(user.Email, user.Password);
+            if (response is not null)
             {
-                return Ok(new { token });
+                return Ok(response);
             }
             _logger.LogWarning("User login failed for email: {Email}", user.Email);
             return Unauthorized();

@@ -70,14 +70,7 @@ try
 
     builder.Services.AddDbContext<AppDbContext>(options =>
     {
-        options.UseSqlServer(
-            connectionString,
-            sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(15),
-                errorNumbersToAdd: null
-            )
-        );
+        options.UseSqlServer(connectionString);
 
         if (builder.Environment.IsDevelopment())
         {

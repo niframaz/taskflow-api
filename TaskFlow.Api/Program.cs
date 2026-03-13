@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Serilog;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -16,120 +17,241 @@ using TaskFlow.Infrastructure.Data;
 using TaskFlow.Infrastructure.Repository;
 using TaskFlow.Infrastructure.Security;
 
-var builder = WebApplication.CreateBuilder(args);
+#region Bootstrap Logger
 
-// Add services to the container.
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
+#endregion
+
+try
+{
+    Log.Information("Starting TaskFlow API");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    #region Serilog Configuration
+
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .Enrich.WithMachineName()
+        .Enrich.WithThreadId()
+        .WriteTo.Console()
+        .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day));
+
+    #endregion
+
+    #region Controllers
+
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+
+    builder.Services.AddOpenApi();
+
+    #endregion
+
+    #region Database
+
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+    if (string.IsNullOrEmpty(connectionString))
     {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        throw new Exception("Database connection string not configured");
+    }
+
+    builder.Services.AddDbContext<AppDbContext>(options =>
+    {
+        options.UseSqlServer(connectionString);
+
+        if (builder.Environment.IsDevelopment())
+        {
+            options.EnableDetailedErrors();
+            options.EnableSensitiveDataLogging();
+        }
     });
 
-builder.Services.AddOpenApi();
+    #endregion
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-})
+    #region Identity
+
+    builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+    })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<ITaskRepository,TaskRepository>();
-builder.Services.AddScoped<IUserRepository,UserRepository>();
-builder.Services.AddScoped<IProjectRepository,ProjectRepository>();
-builder.Services.AddScoped<ITaskService,TaskService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IProjectService, ProjectService>();
-builder.Services.AddScoped<IOrganizationService, OrganizationService>();
-builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IMembershipService, MembershipService>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
+    #endregion
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));
-builder.Services.AddSingleton<IJwtOptions>(sp =>
-    sp.GetRequiredService<IOptions<JwtOptions>>().Value);
+    #region Dependency Injection
 
-var jwtOptions = builder.Configuration
-    .GetSection("JwtSettings")
-    .Get<JwtOptions>();
+    builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+    builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+    builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+    builder.Services.AddScoped<ITaskService, TaskService>();
+    builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<IProjectService, ProjectService>();
+    builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+    builder.Services.AddScoped<IMembershipService, MembershipService>();
+
+    builder.Services.AddScoped<IJwtService, JwtService>();
+    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+    #endregion
+
+    #region JWT Authentication
+
+    builder.Services.Configure<JwtOptions>(
+        builder.Configuration.GetSection("JwtSettings"));
+
+    builder.Services.AddSingleton<IJwtOptions>(sp =>
+        sp.GetRequiredService<IOptions<JwtOptions>>().Value);
+
+    var jwtOptions = builder.Configuration
+        .GetSection("JwtSettings")
+        .Get<JwtOptions>();
+
+    builder.Services.AddAuthentication(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtOptions!.Issuer,
-        ValidAudience = jwtOptions.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
-        RoleClaimType = ClaimTypes.Role
-    };
-});
+        options.DefaultAuthenticateScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtOptions!.Issuer,
+            ValidAudience = jwtOptions.Audience,
+            IssuerSigningKey =
+                new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+            RoleClaimType = ClaimTypes.Role
+        };
 
-builder.Services.AddAutoMapper(cfg =>
-{
-    cfg.AddProfile<MappingProfile>();
-});
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Log.Warning(context.Exception,
+                    "JWT authentication failed");
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                Log.Warning("Unauthorized request to {Path}",
+                    context.Request.Path);
+                return Task.CompletedTask;
+            }
+        };
+    });
 
-builder.Services.AddMemoryCache();
+    #endregion
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngular",
-        policy =>
+    #region AutoMapper
+
+    builder.Services.AddAutoMapper(cfg =>
+    {
+        cfg.AddProfile<MappingProfile>();
+    });
+
+    #endregion
+
+    #region Cache
+
+    builder.Services.AddMemoryCache();
+
+    #endregion
+
+    #region CORS
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAngular", policy =>
         {
             policy.WithOrigins("http://localhost:4200")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
-});
+    });
 
-var app = builder.Build();
+    #endregion
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
+    var app = builder.Build();
+
+    #region Database Initialization
+
+    using (var scope = app.Services.CreateScope())
     {
-        await DbInitializer.InitializeAsync(services);
+        var services = scope.ServiceProvider;
+
+        try
+        {
+            await DbInitializer.InitializeAsync(services);
+            Log.Information("Database initialized successfully");
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Database initialization failed");
+        }
     }
-    catch (Exception ex)
+
+    #endregion
+
+    #region Middleware
+
+    app.UseMiddleware<ExceptionMiddleware>();
+
+    app.UseSerilogRequestLogging();
+
+    #endregion
+
+    #region Development Tools
+
+    if (app.Environment.IsDevelopment())
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred during database initialization.");
+        app.MapOpenApi();
+        app.MapScalarApiReference();
     }
+
+    #endregion
+
+    app.UseHttpsRedirection();
+
+    app.UseCors("AllowAngular");
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    Log.Information("TaskFlow API started");
+
+    app.Run();
 }
-
-app.UseMiddleware<ExceptionMiddleware>();
-
-if (app.Environment.IsDevelopment())
+catch (Exception ex)
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    Log.Fatal(ex, "Application failed to start");
 }
-
-app.UseHttpsRedirection();
-
-app.UseCors("AllowAngular");
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+finally
+{
+    Log.CloseAndFlush();
+}

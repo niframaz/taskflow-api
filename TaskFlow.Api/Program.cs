@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -7,6 +8,7 @@ using Scalar.AspNetCore;
 using Serilog;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using TaskFlow.Api.Mapping;
 using TaskFlow.Api.Middleware;
@@ -19,6 +21,7 @@ using TaskFlow.Infrastructure.Security;
 
 #region Bootstrap Logger
 
+// Minimal bootstrap logger for startup errors
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
@@ -32,6 +35,9 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     #region Serilog Configuration
+
+    // Ensure logs folder exists
+    Directory.CreateDirectory("logs");
 
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .ReadFrom.Configuration(context.Configuration)
@@ -59,11 +65,8 @@ try
     #region Database
 
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
     if (string.IsNullOrEmpty(connectionString))
-    {
         throw new Exception("Database connection string not configured");
-    }
 
     builder.Services.AddDbContext<AppDbContext>(options =>
     {
@@ -141,8 +144,7 @@ try
             ValidIssuer = jwtOptions!.Issuer,
             ValidAudience = jwtOptions.Audience,
             IssuerSigningKey =
-                new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
             RoleClaimType = ClaimTypes.Role
         };
 
@@ -150,14 +152,12 @@ try
         {
             OnAuthenticationFailed = context =>
             {
-                Log.Warning(context.Exception,
-                    "JWT authentication failed");
+                Log.Warning(context.Exception, "JWT authentication failed");
                 return Task.CompletedTask;
             },
             OnChallenge = context =>
             {
-                Log.Warning("Unauthorized request to {Path}",
-                    context.Request.Path);
+                Log.Warning("Unauthorized request to {Path}", context.Request.Path);
                 return Task.CompletedTask;
             }
         };
@@ -167,10 +167,7 @@ try
 
     #region AutoMapper
 
-    builder.Services.AddAutoMapper(cfg =>
-    {
-        cfg.AddProfile<MappingProfile>();
-    });
+    builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
     #endregion
 
@@ -192,6 +189,13 @@ try
                   .AllowCredentials();
         });
     });
+
+    #endregion
+
+    #region Health Checks
+
+    builder.Services.AddHealthChecks()
+        .AddDbContextCheck<AppDbContext>();
 
     #endregion
 
@@ -220,6 +224,7 @@ try
 
     app.UseMiddleware<ExceptionMiddleware>();
 
+    // Serilog request logging
     app.UseSerilogRequestLogging();
 
     #endregion
@@ -234,6 +239,8 @@ try
 
     #endregion
 
+    #region Routing
+
     app.UseHttpsRedirection();
 
     app.UseCors("AllowAngular");
@@ -242,6 +249,28 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
+
+    // Health check endpoint
+    app.MapHealthChecks("/health", new HealthCheckOptions
+    {
+        ResponseWriter = async (context, report) =>
+        {
+            context.Response.ContentType = "application/json";
+            var result = JsonSerializer.Serialize(new
+            {
+                status = report.Status.ToString(),
+                checks = report.Entries.Select(e => new {
+                    name = e.Key,
+                    status = e.Value.Status.ToString(),
+                    exception = e.Value.Exception?.Message,
+                    duration = e.Value.Duration.ToString()
+                })
+            });
+            await context.Response.WriteAsync(result);
+        }
+    });
+
+    #endregion
 
     Log.Information("TaskFlow API started");
 

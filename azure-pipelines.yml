@@ -57,7 +57,7 @@ stages:
   jobs:
 
   - deployment: DeployWebApp
-    environment: 'production'
+    environment: 'development'
 
     strategy:
       runOnce:

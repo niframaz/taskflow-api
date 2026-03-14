@@ -7,6 +7,15 @@ pool:
 variables:
   buildConfiguration: 'Release'
 
+# ---------------- PARAMETERS ----------------
+parameters:
+  - name: environment
+    type: string
+    default: 'development'   # override to 'production' when triggering
+  - name: webAppName
+    type: string
+    default: 'TaskFlowApi-Dev'  # change to production app name when triggering
+
 stages:
 
 # ---------------- BUILD STAGE ----------------
@@ -14,6 +23,7 @@ stages:
   displayName: Build Stage
   jobs:
   - job: Build
+    displayName: Build
     steps:
 
     - task: UseDotNet@2
@@ -49,7 +59,6 @@ stages:
         pathToPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'drop'
 
-
 # ---------------- DEPLOY STAGE ----------------
 - stage: Deploy
   displayName: Deploy Stage
@@ -57,8 +66,8 @@ stages:
   jobs:
 
   - deployment: DeployWebApp
-    environment: 'development'
-
+    displayName: 'Deploy Web App'
+    environment: ${{ parameters.environment }}
     strategy:
       runOnce:
         deploy:
@@ -71,5 +80,6 @@ stages:
             displayName: 'Deploy to Azure Web App'
             inputs:
               azureSubscription: 'AzureServiceConnection'
-              appName: 'TaskFlowApi'
+              appName: '${{ parameters.webAppName }}'
               package: '$(Pipeline.Workspace)/drop/**/*.zip'
+              appType: 'webApp'

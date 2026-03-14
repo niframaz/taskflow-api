@@ -21,7 +21,6 @@ using TaskFlow.Infrastructure.Security;
 
 #region Bootstrap Logger
 
-// Minimal bootstrap logger for startup errors
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
@@ -36,17 +35,12 @@ try
 
     #region Serilog Configuration
 
-    // Ensure logs folder exists
     Directory.CreateDirectory("logs");
 
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .Enrich.WithMachineName()
-        .Enrich.WithThreadId()
-        .WriteTo.Console()
-        .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day));
+        .Enrich.FromLogContext());
 
     #endregion
 
@@ -224,7 +218,6 @@ try
 
     app.UseMiddleware<ExceptionMiddleware>();
 
-    // Serilog request logging
     app.UseSerilogRequestLogging();
 
     #endregion
@@ -250,7 +243,6 @@ try
 
     app.MapControllers();
 
-    // Health check endpoint
     app.MapHealthChecks("/health", new HealthCheckOptions
     {
         ResponseWriter = async (context, report) =>

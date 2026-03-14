@@ -11,10 +11,10 @@ variables:
 parameters:
   - name: environment
     type: string
-    default: 'development'   # override to 'production' when triggering
+    default: 'production'   # override to 'development' when triggering
   - name: webAppName
     type: string
-    default: 'TaskFlowApi-Dev'  # change to production app name when triggering
+    default: 'TaskFlowApi'  # change to development app name when triggering
 
 stages:
 

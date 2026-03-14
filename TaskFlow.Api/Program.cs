@@ -20,11 +20,9 @@ using TaskFlow.Infrastructure.Repository;
 using TaskFlow.Infrastructure.Security;
 
 #region Bootstrap Logger
-
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
-
 #endregion
 
 try
@@ -33,24 +31,44 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+    #region Determine Log Paths
+
+    var home = Environment.GetEnvironmentVariable("HOME") ?? "";
+    var logDir = builder.Environment.IsDevelopment()
+        ? "logs/TaskFlowApi"
+        : Path.Combine(home, "LogFiles", "TaskFlowApi");
+    Directory.CreateDirectory(logDir);
+
+    var tempDir = builder.Environment.IsDevelopment()
+        ? "Temp"
+        : Path.Combine(home, "Temp");
+    Directory.CreateDirectory(tempDir);
+
+    #endregion
+
     #region Serilog Configuration
 
-    Directory.CreateDirectory("logs");
+    builder.Host.UseSerilog((context, services, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .WriteTo.File(Path.Combine(logDir, "log-.txt"), rollingInterval: RollingInterval.Day)
+            .WriteTo.Console();
 
-    builder.Host.UseSerilog((context, services, configuration) => configuration
-        .ReadFrom.Configuration(context.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext());
+        if (builder.Environment.IsDevelopment())
+        {
+            configuration.WriteTo.Seq("http://localhost:5341");
+        }
+    });
 
     #endregion
 
     #region Controllers
 
     builder.Services.AddControllers()
-        .AddJsonOptions(options =>
-        {
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        });
+        .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
     builder.Services.AddOpenApi();
 
@@ -58,9 +76,8 @@ try
 
     #region Database
 
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    if (string.IsNullOrEmpty(connectionString))
-        throw new Exception("Database connection string not configured");
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new Exception("Database connection string not configured");
 
     builder.Services.AddDbContext<AppDbContext>(options =>
     {
@@ -110,22 +127,15 @@ try
 
     #region JWT Authentication
 
-    builder.Services.Configure<JwtOptions>(
-        builder.Configuration.GetSection("JwtSettings"));
+    builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));
+    builder.Services.AddSingleton<IJwtOptions>(sp => sp.GetRequiredService<IOptions<JwtOptions>>().Value);
 
-    builder.Services.AddSingleton<IJwtOptions>(sp =>
-        sp.GetRequiredService<IOptions<JwtOptions>>().Value);
-
-    var jwtOptions = builder.Configuration
-        .GetSection("JwtSettings")
-        .Get<JwtOptions>();
+    var jwtOptions = builder.Configuration.GetSection("JwtSettings").Get<JwtOptions>()!;
 
     builder.Services.AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme =
-            JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme =
-            JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
@@ -135,10 +145,9 @@ try
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtOptions!.Issuer,
+            ValidIssuer = jwtOptions.Issuer,
             ValidAudience = jwtOptions.Audience,
-            IssuerSigningKey =
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
             RoleClaimType = ClaimTypes.Role
         };
 
@@ -188,8 +197,7 @@ try
 
     #region Health Checks
 
-    builder.Services.AddHealthChecks()
-        .AddDbContextCheck<AppDbContext>();
+    builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 
     #endregion
 
@@ -217,7 +225,6 @@ try
     #region Middleware
 
     app.UseMiddleware<ExceptionMiddleware>();
-
     app.UseSerilogRequestLogging();
 
     #endregion
@@ -235,12 +242,9 @@ try
     #region Routing
 
     app.UseHttpsRedirection();
-
     app.UseCors("AllowAngular");
-
     app.UseAuthentication();
     app.UseAuthorization();
-
     app.MapControllers();
 
     app.MapHealthChecks("/health", new HealthCheckOptions
@@ -265,7 +269,6 @@ try
     #endregion
 
     Log.Information("TaskFlow API started");
-
     app.Run();
 }
 catch (Exception ex)

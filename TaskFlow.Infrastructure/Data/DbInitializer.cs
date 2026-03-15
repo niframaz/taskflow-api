@@ -7,10 +7,32 @@ namespace TaskFlow.Infrastructure.Data
     {
         public static async Task InitializeAsync(IServiceProvider services)
         {
-            var context = services.GetRequiredService<AppDbContext>();
-            await context.Database.MigrateAsync();
+            var retries = 10;
+            var delay = TimeSpan.FromSeconds(5);
 
-            await IdentitySeeder.SeedRolesAsync(services);
+            while (retries > 0)
+            {
+                try
+                {
+                    var context = services.GetRequiredService<AppDbContext>();
+
+                    await context.Database.MigrateAsync();
+
+                    await IdentitySeeder.SeedRolesAsync(services);
+
+                    return; // success
+                }
+                catch (Exception ex)
+                {
+                    retries--;
+
+                    if (retries == 0)
+                        throw;
+
+                    Console.WriteLine($"Database migration failed. Retrying in 5 seconds... {retries} retries left.");
+                    await Task.Delay(delay);
+                }
+            }
         }
     }
 }

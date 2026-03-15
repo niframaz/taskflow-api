@@ -1,85 +1,71 @@
 trigger:
-- master
+- develop   # Trigger on the dev branch
 
 pool:
   name: Default
 
 variables:
-  buildConfiguration: 'Release'
+  dockerRegistryServiceConnection: 'MyTaskFlowAcr'  # Your ACR service connection
+  imageName: 'taskflowapi'                          # Docker image name
+  buildConfiguration: 'Debug'
 
-# ---------------- PARAMETERS ----------------
 parameters:
   - name: environment
     type: string
-    default: 'production'   # override to 'development' when triggering
-  - name: webAppName
+    default: 'development'
+  - name: dockerTag
     type: string
-    default: 'TaskFlowApi'  # change to development app name when triggering
+    default: 'dev'
+  - name: appName
+    type: string
+    default: 'TaskFlowApi-Dev'                     # Free-tier App Service name
 
 stages:
 
-# ---------------- BUILD STAGE ----------------
+# ---------------- Stage 1: Build & Push Docker Image ----------------
 - stage: Build
-  displayName: Build Stage
+  displayName: Build Docker Image
   jobs:
-  - job: Build
-    displayName: Build
+  - job: BuildDocker
+    displayName: Build Docker
     steps:
 
+    # Install .NET SDK
     - task: UseDotNet@2
       displayName: 'Install .NET SDK'
       inputs:
         packageType: 'sdk'
         version: '10.x'
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Restore NuGet packages'
+    # Build and Push Docker Image to MyTaskFlowAcr
+    - task: Docker@2
+      displayName: 'Build & Push Docker Image'
       inputs:
-        command: 'restore'
-        projects: '**/*.csproj'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageName)
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          ${{ parameters.dockerTag }}
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Build Project'
-      inputs:
-        command: 'build'
-        projects: '**/*.csproj'
-        arguments: '--configuration $(buildConfiguration)'
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish Project'
-      inputs:
-        command: 'publish'
-        publishWebProjects: true
-        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-        zipAfterPublish: true
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact'
-      inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)'
-        artifactName: 'drop'
-
-# ---------------- DEPLOY STAGE ----------------
+# ---------------- Stage 2: Deploy to Free App Service ----------------
 - stage: Deploy
-  displayName: Deploy Stage
+  displayName: Deploy Docker Container
   dependsOn: Build
   jobs:
-
-  - deployment: DeployWebApp
-    displayName: 'Deploy Web App'
+  - deployment: DeployDockerDev
+    displayName: 'Deploy Docker Container'
     environment: ${{ parameters.environment }}
     strategy:
       runOnce:
         deploy:
           steps:
 
-          - download: current
-            artifact: drop
-
-          - task: AzureWebApp@1
-            displayName: 'Deploy to Azure Web App'
+          # Deploy container to App Service (Free Tier)
+          - task: AzureWebAppContainer@1
+            displayName: 'Deploy to Azure App Service (Dev)'
             inputs:
-              azureSubscription: 'AzureServiceConnection'
-              appName: '${{ parameters.webAppName }}'
-              package: '$(Pipeline.Workspace)/drop/**/*.zip'
-              appType: 'webApp'
+              azureSubscription: 'AzureServiceConnection-Dev'
+              appName: '${{ parameters.appName }}'
+              containers: |
+                MyTaskFlowAcr.azurecr.io/$(imageName):${{ parameters.dockerTag }}

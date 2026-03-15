@@ -53,14 +53,7 @@ try
         configuration
             .ReadFrom.Configuration(context.Configuration)
             .ReadFrom.Services(services)
-            .Enrich.FromLogContext()
-            .WriteTo.File(Path.Combine(logDir, "log-.txt"), rollingInterval: RollingInterval.Day)
-            .WriteTo.Console();
-
-        if (builder.Environment.IsDevelopment())
-        {
-            configuration.WriteTo.Seq("http://localhost:5341");
-        }
+            .Enrich.FromLogContext();
     });
 
     #endregion

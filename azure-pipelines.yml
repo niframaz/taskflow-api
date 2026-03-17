@@ -82,19 +82,6 @@ stages:
           - download: current
             artifact: drop
 
-          # Apply EF Core migrations
-          - task: DotNetCoreCLI@2
-            displayName: 'Apply EF Core Migrations'
-            inputs:
-              command: 'custom'
-              custom: 'ef'
-              arguments: > 
-                database update 
-                --project TaskFlow.Infrastructure/TaskFlow.Infrastructure.csproj
-                --startup-project TaskFlow.Api/TaskFlow.Api.csproj
-                --configuration $(buildConfiguration)
-                --connection "$(DB_CONNECTION_STRING)"
-
           # Deploy the web app to Azure
           - task: AzureWebApp@1
             displayName: 'Deploy to Azure Web App'

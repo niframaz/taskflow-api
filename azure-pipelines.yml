@@ -82,14 +82,6 @@ stages:
           - download: current
             artifact: drop
 
-          # Install EF Core CLI (global tool)
-          - task: DotNetCoreCLI@2
-            displayName: 'Install EF Core CLI'
-            inputs:
-              command: 'custom'
-              custom: 'tool'
-              arguments: 'install --global dotnet-ef --version 10.*'
-
           # Apply EF Core migrations
           - task: DotNetCoreCLI@2
             displayName: 'Apply EF Core Migrations'

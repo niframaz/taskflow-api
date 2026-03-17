@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace TaskFlow.Infrastructure.Data
 {
@@ -7,29 +8,40 @@ namespace TaskFlow.Infrastructure.Data
     {
         public static async Task InitializeAsync(IServiceProvider services)
         {
-            var retries = 10;
+            const int maxRetries = 10;
             var delay = TimeSpan.FromSeconds(5);
 
-            while (retries > 0)
+            using var scope = services.CreateScope();
+            var serviceProvider = scope.ServiceProvider;
+
+            var context = serviceProvider.GetRequiredService<AppDbContext>();
+            var logger = serviceProvider.GetRequiredService<ILoggerFactory>()
+                                        .CreateLogger("DbInitializer");
+
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
                 try
                 {
-                    var context = services.GetRequiredService<AppDbContext>();
+                    logger.LogInformation("Starting database migration attempt {Attempt}", attempt);
 
                     await context.Database.MigrateAsync();
 
-                    await IdentitySeeder.SeedRolesAsync(services);
+                    await IdentitySeeder.SeedRolesAsync(serviceProvider);
 
-                    return; // success
+                    logger.LogInformation("Database migration and seeding completed successfully");
+
+                    return;
                 }
                 catch (Exception ex)
                 {
-                    retries--;
+                    logger.LogError(ex, "Database migration failed on attempt {Attempt}", attempt);
 
-                    if (retries == 0)
+                    if (attempt == maxRetries)
+                    {
+                        logger.LogCritical("Database migration failed after {MaxRetries} attempts", maxRetries);
                         throw;
+                    }
 
-                    Console.WriteLine($"Database migration failed. Retrying in 5 seconds... {retries} retries left.");
                     await Task.Delay(delay);
                 }
             }

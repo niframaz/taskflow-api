@@ -196,25 +196,6 @@ try
 
     var app = builder.Build();
 
-    #region Database Initialization
-
-    using (var scope = app.Services.CreateScope())
-    {
-        var services = scope.ServiceProvider;
-
-        try
-        {
-            await DbInitializer.InitializeAsync(services);
-            Log.Information("Database initialized successfully");
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "Database initialization failed");
-        }
-    }
-
-    #endregion
-
     #region Middleware
 
     app.UseMiddleware<ExceptionMiddleware>();
@@ -228,6 +209,21 @@ try
     {
         app.MapOpenApi();
         app.MapScalarApiReference();
+
+        #region Database Initialization
+
+        try
+        {
+            await DbInitializer.InitializeAsync(app.Services);
+            Log.Information("Database initialized successfully (Development only)");
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Database initialization failed");
+            throw;
+        }
+
+        #endregion
     }
 
     #endregion

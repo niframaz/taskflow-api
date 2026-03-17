@@ -26,18 +26,21 @@ stages:
     displayName: Build
     steps:
 
+    # Install correct .NET SDK
     - task: UseDotNet@2
-      displayName: 'Install .NET SDK'
+      displayName: 'Install .NET 10 SDK'
       inputs:
         packageType: 'sdk'
         version: '10.x'
 
+    # Restore packages
     - task: DotNetCoreCLI@2
       displayName: 'Restore NuGet packages'
       inputs:
         command: 'restore'
         projects: '**/*.csproj'
 
+    # Build project
     - task: DotNetCoreCLI@2
       displayName: 'Build Project'
       inputs:
@@ -45,6 +48,7 @@ stages:
         projects: '**/*.csproj'
         arguments: '--configuration $(buildConfiguration)'
 
+    # Publish project
     - task: DotNetCoreCLI@2
       displayName: 'Publish Project'
       inputs:
@@ -53,6 +57,7 @@ stages:
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
         zipAfterPublish: true
 
+    # Publish build artifacts
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
       inputs:
@@ -73,10 +78,19 @@ stages:
         deploy:
           steps:
 
+          # Download the published artifact
           - download: current
             artifact: drop
 
-          # ---------------- APPLY MIGRATIONS ----------------
+          # Install EF Core CLI (global tool)
+          - task: DotNetCoreCLI@2
+            displayName: 'Install EF Core CLI'
+            inputs:
+              command: 'custom'
+              custom: 'tool'
+              arguments: 'install --global dotnet-ef --version 8.*'
+
+          # Apply EF Core migrations
           - task: DotNetCoreCLI@2
             displayName: 'Apply EF Core Migrations'
             inputs:
@@ -85,7 +99,7 @@ stages:
               projects: '**/TaskFlow.Infrastructure.csproj'
               arguments: '--configuration $(buildConfiguration)'
 
-          # ---------------- DEPLOY WEB APP ----------------
+          # Deploy the web app to Azure
           - task: AzureWebApp@1
             displayName: 'Deploy to Azure Web App'
             inputs:

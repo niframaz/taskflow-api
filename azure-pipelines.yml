@@ -87,9 +87,8 @@ stages:
             displayName: 'Apply EF Core Migrations'
             inputs:
               command: 'custom'
-              custom: 'ef database update'
-              projects: '**/TaskFlow.Infrastructure.csproj'
-              arguments: '--configuration $(buildConfiguration)'
+              custom: 'tool'
+              arguments: 'run dotnet-ef database update --project **/TaskFlow.Infrastructure.csproj --configuration $(buildConfiguration)'
 
           # Deploy the web app to Azure
           - task: AzureWebApp@1

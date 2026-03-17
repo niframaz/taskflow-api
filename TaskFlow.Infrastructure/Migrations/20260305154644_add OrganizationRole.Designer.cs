@@ -13,7 +13,7 @@ namespace TaskFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260305154644_add OrganizationRole")]
-    partial class addOrganizationRole
+    partial class AddOrganizationRole
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

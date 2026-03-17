@@ -5,7 +5,7 @@
 namespace TaskFlow.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class cleanup : Migration
+    public partial class Cleanup : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

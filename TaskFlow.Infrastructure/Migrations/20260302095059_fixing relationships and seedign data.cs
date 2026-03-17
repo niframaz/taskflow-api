@@ -5,7 +5,7 @@
 namespace TaskFlow.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class fixingrelationshipsandseedigndata : Migration
+    public partial class Fixingrelationshipsandseedigndata : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

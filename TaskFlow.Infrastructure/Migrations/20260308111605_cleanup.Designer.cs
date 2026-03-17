@@ -13,7 +13,7 @@ namespace TaskFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260308111605_cleanup")]
-    partial class cleanup
+    partial class Cleanup
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

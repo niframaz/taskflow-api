@@ -5,7 +5,7 @@
 namespace TaskFlow.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class addOrganizationRole : Migration
+    public partial class AddOrganizationRole : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

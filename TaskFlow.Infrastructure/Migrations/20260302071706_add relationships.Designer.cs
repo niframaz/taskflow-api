@@ -13,7 +13,7 @@ namespace TaskFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260302071706_add relationships")]
-    partial class addrelationships
+    partial class Addrelationships
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

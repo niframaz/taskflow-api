@@ -13,7 +13,7 @@ namespace TaskFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260305144857_user dont need to belong to org")]
-    partial class userdontneedtobelongtoorg
+    partial class Userdontneedtobelongtoorg
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

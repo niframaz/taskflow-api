@@ -5,7 +5,7 @@
 namespace TaskFlow.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class userdontneedtobelongtoorg : Migration
+    public partial class Userdontneedtobelongtoorg : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

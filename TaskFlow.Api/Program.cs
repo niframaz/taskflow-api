@@ -198,6 +198,21 @@ try
 
     #region Middleware
 
+    #region Database Initialization
+    //Remove this in production - we should be using migrations and seeding in a more controlled way
+    try
+    {
+        await DbInitializer.InitializeAsync(app.Services);
+        Log.Information("Database initialized successfully (Development only)");
+    }
+    catch (Exception ex)
+    {
+        Log.Fatal(ex, "Database initialization failed");
+        throw;
+    }
+
+    #endregion
+
     app.UseMiddleware<ExceptionMiddleware>();
     app.UseSerilogRequestLogging();
 
@@ -209,21 +224,6 @@ try
     {
         app.MapOpenApi();
         app.MapScalarApiReference();
-
-        #region Database Initialization
-
-        try
-        {
-            await DbInitializer.InitializeAsync(app.Services);
-            Log.Information("Database initialized successfully (Development only)");
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "Database initialization failed");
-            throw;
-        }
-
-        #endregion
     }
 
     #endregion

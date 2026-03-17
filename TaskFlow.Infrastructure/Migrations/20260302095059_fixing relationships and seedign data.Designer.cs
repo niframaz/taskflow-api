@@ -13,7 +13,7 @@ namespace TaskFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260302095059_fixing relationships and seedign data")]
-    partial class fixingrelationshipsandseedigndata
+    partial class Fixingrelationshipsandseedigndata
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

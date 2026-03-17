@@ -7,14 +7,14 @@ pool:
 variables:
   buildConfiguration: 'Release'
 
-# ---------------- PARAMETERS ----------------
+
 parameters:
   - name: environment
     type: string
-    default: 'production'   # override to 'development' when triggering
+    default: 'production'
   - name: webAppName
     type: string
-    default: 'TaskFlowApi'  # change to development app name when triggering
+    default: 'TaskFlowApi'
 
 stages:
 
@@ -76,6 +76,16 @@ stages:
           - download: current
             artifact: drop
 
+          # ---------------- APPLY MIGRATIONS ----------------
+          - task: DotNetCoreCLI@2
+            displayName: 'Apply EF Core Migrations'
+            inputs:
+              command: 'custom'
+              custom: 'ef database update'
+              projects: '**/TaskFlow.Infrastructure.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+
+          # ---------------- DEPLOY WEB APP ----------------
           - task: AzureWebApp@1
             displayName: 'Deploy to Azure Web App'
             inputs:

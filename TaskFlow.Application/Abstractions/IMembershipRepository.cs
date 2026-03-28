@@ -6,9 +6,8 @@ namespace TaskFlow.Application.Abstractions
     public interface IMembershipRepository : IRepository<Membership>
     {
         Task<List<Membership>> GetUserMembershipsAsync(string userId);
-        Task<Membership?> GetUserMembershipForOrgAsync(int organizationId, string userId);
-        Task<IList<Membership>> GetMembershipsForOrgAsync(int organizationId);
         void AddMembershipRoleAsync(Membership membership, OrgRole role);
         Task<Membership?> GetUserMembershipForOrgByEmailAsync(int organizationId, string email);
+        Task<List<Membership>> GetOrganizationMembershipsAsync(int orgId);
     }
 }

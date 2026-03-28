@@ -17,20 +17,12 @@ namespace TaskFlow.Infrastructure.Repository
                 .Include(x => x.User)
                 .ToListAsync();
         }
-        public async Task<Membership?> GetUserMembershipForOrgAsync(int organizationId, string userId)
+        public async Task<List<Membership>> GetOrganizationMembershipsAsync(int orgId)
         {
             return await _dbSet
                 .AsNoTracking()
+                .Where(x => x.OrganizationId == orgId)
                 .Include(x => x.OrganizationRoles)
-                .Include(x => x.User)
-                .FirstOrDefaultAsync(x => x.UserId == userId && x.OrganizationId == organizationId);
-        }
-        public async Task<IList<Membership>> GetMembershipsForOrgAsync(int organizationId)
-        {
-            return await _dbSet
-                .AsNoTracking()
-                .Where(x => x.OrganizationId == organizationId)
-                .Include(x => x.OrganizationRoles.Where(o => o.Id == organizationId))
                 .Include(x => x.User)
                 .ToListAsync();
         }
@@ -44,6 +36,7 @@ namespace TaskFlow.Infrastructure.Repository
         }
         public void AddMembershipRoleAsync(Membership membership, OrgRole role)
         {
+            //add costraint: prevent duplicate roles for the same membership
             var existingRole = membership.OrganizationRoles.FirstOrDefault(r => r.Role == role);
 
             if (existingRole != null)

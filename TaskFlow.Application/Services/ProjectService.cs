@@ -21,5 +21,11 @@ namespace TaskFlow.Application.Services
                     throw new UnauthorizedAccessException("User does not have access to this project.");
             return project;
         }
+        //public override async Task<IEnumerable<Project>> GetAllAsync()
+        //{
+        //    var projects = await _repository.GetAllAsync();
+        //    var userMemberships = await _membershipService.GetUserMembershipsForOrgAsync();
+        //    return projects.Where(p => userMemberships.Any(m => m.OrganizationId == p.OrganizationId));
+        //}
     }
 }

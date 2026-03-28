@@ -22,7 +22,7 @@ namespace TaskFlow.Application.Services
             var cacheKey = GetMembershipCacheKey(userId!);
             return (await _cache.GetOrCreateAsync(cacheKey, async entry =>
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);//add to appsettings
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);//add to appsettings
                 var result = await _repository.GetUserMembershipsAsync(userId!);
                 return result;
             }))!;
@@ -39,28 +39,22 @@ namespace TaskFlow.Application.Services
         }
         public async Task<Membership?> GetUserMembershipForOrgAsync(int organizationId, string? userId = null)
         {
-            userId ??= _userService.MyId;
-            return await _repository.GetUserMembershipForOrgAsync(organizationId, userId!);
+            var memberships = await GetUserMembershipsAsync(userId);
+            return memberships.FirstOrDefault(m => m.OrganizationId == organizationId);
         }
-        public async Task<IList<Membership>> GetAllMembershipsForMyOrgAsync(int orgId)
+        public async Task<IEnumerable<Membership>> GetAllMembershipsForMyOrgAsync(int orgId)
         {
-            var myMembership = await GetUserMembershipForOrgAsync(orgId);
-            return myMembership is null
-                ? throw new UnauthorizedAccessException("User does not have access to this organization.")
-                : await _repository.GetMembershipsForOrgAsync(orgId);
+            var memberships = await _repository.GetOrganizationMembershipsAsync(orgId);
+            var iAmAMember = memberships.Any(m => m.UserId == _userService.MyId);
+            return iAmAMember
+                ? memberships
+                : throw new UnauthorizedAccessException("User does not have access to this organization.");
         }
         public async Task<bool> AddMembershipRoleAsync(int orgId, string userId, OrgRole role)
         {
-            var hasAccess = await IAmAdminAndHasAccessToOrgAsync(orgId);
-            if (!hasAccess)
-            {
-                throw new UnauthorizedAccessException("User does not have access to edit this member.");
-            }
-            var member = await _repository.GetUserMembershipForOrgAsync(orgId, userId);
-            if(member is null)
-            {
-                return false;
-            }
+            var memberships = await GetUserMembershipsAsync(userId);
+            var member = memberships.FirstOrDefault(m => m.OrganizationId == orgId && m.OrganizationRoles.Any(x => x.Role == OrgRole.Admin))
+                ?? throw new UnauthorizedAccessException("User does not have access to edit this member.");
             _repository.AddMembershipRoleAsync(member, role);
             InvalidateMembership(member.UserId);
             return await _repository.SaveChangesAsync();

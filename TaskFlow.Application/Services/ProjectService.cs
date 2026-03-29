@@ -21,11 +21,21 @@ namespace TaskFlow.Application.Services
                     throw new UnauthorizedAccessException("User does not have access to this project.");
             return project;
         }
-        //public override async Task<IEnumerable<Project>> GetAllAsync()
-        //{
-        //    var projects = await _repository.GetAllAsync();
-        //    var userMemberships = await _membershipService.GetUserMembershipsForOrgAsync();
-        //    return projects.Where(p => userMemberships.Any(m => m.OrganizationId == p.OrganizationId));
-        //}
+        public override async Task<IEnumerable<Project>> GetAllAsync()
+        {
+            var userMemberships = await _membershipService.GetUserMembershipsAsync();
+            var accessibleOrgIds = userMemberships.Select(m => m.OrganizationId);
+            var projects = await _repository.GetAllByUserMembershipsAsync(accessibleOrgIds);
+            return projects;
+        }
+        public override async Task<bool> AddAsync(Project entity)
+        {
+            var userMemberships = await _membershipService.GetUserMembershipsAsync();
+            var orgMembership = userMemberships.FirstOrDefault(m => m.OrganizationId == entity.OrganizationId) 
+                ?? throw new UnauthorizedAccessException("User does not have access to this organization.");
+            _repository.Add(entity);
+            var result = await _repository.SaveChangesAsync();
+            return result;
+        }
     }
 }

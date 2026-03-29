@@ -35,7 +35,7 @@ namespace TaskFlow.Api.Controllers
             return result;
         }
 
-        [HttpPost]
+        [HttpPost("{organizationId}")]
         public async Task<IActionResult> Post([FromBody] ProjectRequest projectRequest, [FromRoute] int organizationId)
         {
             var request = _mapper.Map<Project>(projectRequest);

@@ -8,5 +8,6 @@ namespace TaskFlow.Api.Contracts
         public required string Name { get; set; }
         [MaxLength(1000)]
         public string? Description { get; set; }
+        public required int OrganizationId { get; set; }
     }
 }

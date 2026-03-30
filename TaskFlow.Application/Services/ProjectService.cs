@@ -18,7 +18,7 @@ namespace TaskFlow.Application.Services
         {
             var project = await _repository.GetAsync(id);
             if (project != null && await _membershipService.GetUserMembershipForOrgAsync(project.OrganizationId) == null)
-                    throw new UnauthorizedAccessException("User does not have access to this project.");
+                throw new UnauthorizedAccessException("User does not have access to this project.");
             return project;
         }
         public override async Task<IEnumerable<Project>> GetAllAsync()
@@ -31,11 +31,27 @@ namespace TaskFlow.Application.Services
         public override async Task<bool> AddAsync(Project entity)
         {
             var userMemberships = await _membershipService.GetUserMembershipsAsync();
-            var orgMembership = userMemberships.FirstOrDefault(m => m.OrganizationId == entity.OrganizationId) 
+            _ = userMemberships.FirstOrDefault(m => m.OrganizationId == entity.OrganizationId)
                 ?? throw new UnauthorizedAccessException("User does not have access to this organization.");
             _repository.Add(entity);
             var result = await _repository.SaveChangesAsync();
             return result;
+        }
+        public override async Task<bool> RemoveAsync(int id)
+        {
+            var project = await _repository.GetAsync(id) ?? throw new KeyNotFoundException("Project not found.");
+            var iAmAnAdminOfOrg = await _membershipService.IAmAdminAndHasAccessToOrgAsync(project.OrganizationId);
+            if (!iAmAnAdminOfOrg)
+                throw new UnauthorizedAccessException("User does not have access to delete this project.");
+            _repository.Remove(project);
+            var result = await _repository.SaveChangesAsync();
+            return result;
+        }
+        public async Task<IEnumerable<Project>> GetAllForOrgAsync(int id)
+        {
+            _ = _membershipService.GetUserMembershipForOrgAsync(id)
+                ?? throw new UnauthorizedAccessException("User does not have access to this organization.");
+            return await _repository.GetAllByOrganizationIdAsync(id);
         }
     }
 }

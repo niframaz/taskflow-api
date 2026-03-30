@@ -5,5 +5,6 @@ namespace TaskFlow.Application.Abstractions
     public interface IProjectService : IEntityService<Project>
     {
         Task<bool> UpdateAsync(int id, Project project);
+        Task<IEnumerable<Project>> GetAllForOrgAsync(int id);
     }
 }

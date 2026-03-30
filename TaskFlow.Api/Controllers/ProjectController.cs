@@ -35,11 +35,10 @@ namespace TaskFlow.Api.Controllers
             return result;
         }
 
-        [HttpPost("{organizationId}")]
-        public async Task<IActionResult> Post([FromBody] ProjectRequest projectRequest, [FromRoute] int organizationId)
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] ProjectRequest projectRequest)
         {
             var request = _mapper.Map<Project>(projectRequest);
-            request.OrganizationId = organizationId;
             var result = await _projectService.AddAsync(request);
             if (result)
                 return CreatedAtAction(nameof(Get), new { id = request.Id }, request);
@@ -47,10 +46,9 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] ProjectRequest projectRequest, [FromRoute] int organizationId)
+        public async Task<IActionResult> Put([FromRoute]int id, [FromBody] ProjectRequest projectRequest)
         {
             var request = _mapper.Map<Project>(projectRequest);
-            request.OrganizationId = organizationId;
             var result = await _projectService.UpdateAsync(id, request);
             if (result)
                 return NoContent();
@@ -64,6 +62,12 @@ namespace TaskFlow.Api.Controllers
             if (result)
                 return NoContent();
             return StatusCode(500);
+        }
+        [HttpGet("organization/{id}")]
+        public async Task<ActionResult<IEnumerable<Project>>> GetForOrg(int id)
+        {
+            var result = await _projectService.GetAllForOrgAsync(id);
+            return Ok(result);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace TaskFlow.Api.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class MembershipController(IMembershipService service, IMapper mapper) : ControllerBase
+    public class MembershipsController(IMembershipService service, IMapper mapper) : ControllerBase
     {
         private readonly IMembershipService _service = service;
         private readonly IMapper _mapper = mapper;

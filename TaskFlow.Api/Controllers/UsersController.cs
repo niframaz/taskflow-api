@@ -13,11 +13,11 @@ namespace TaskFlow.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(IUserService userService, IMapper mapper, ILogger<UserController> logger) : ControllerBase
+    public class UsersController(IUserService userService, IMapper mapper, ILogger<UsersController> logger) : ControllerBase
     {
         private readonly IUserService _userService = userService;
         private readonly IMapper _mapper = mapper;
-        private readonly ILogger<UserController> _logger = logger;
+        private readonly ILogger<UsersController> _logger = logger;
         // GET: api/<UserController>
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserRegistrationRequest user)

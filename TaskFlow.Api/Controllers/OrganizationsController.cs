@@ -12,7 +12,7 @@ namespace TaskFlow.Api.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class OrganizationController(IOrganizationService service, IMapper mapper) : ControllerBase
+    public class OrganizationsController(IOrganizationService service, IMapper mapper) : ControllerBase
     {
         private readonly IOrganizationService _service = service;
         private readonly IMapper _mapper = mapper;

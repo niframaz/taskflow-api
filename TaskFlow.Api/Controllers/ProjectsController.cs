@@ -12,7 +12,7 @@ namespace TaskFlow.Api.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class ProjectController(IProjectService projectService, IMapper mapper) : ControllerBase
+    public class ProjectsController(IProjectService projectService, IMapper mapper) : ControllerBase
     {
         private readonly IProjectService _projectService = projectService;
         private readonly IMapper _mapper = mapper;

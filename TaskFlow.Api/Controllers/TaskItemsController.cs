@@ -11,7 +11,7 @@ namespace TaskFlow.Api.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class TaskItemController(ITaskService taskService, IMapper mapper) : ControllerBase
+    public class TaskItemsController(ITaskService taskService, IMapper mapper) : ControllerBase
     {
         private readonly ITaskService _taskService = taskService;
         private readonly IMapper _mapper = mapper;

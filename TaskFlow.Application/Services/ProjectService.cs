@@ -9,6 +9,9 @@ namespace TaskFlow.Application.Services
         private readonly IMembershipService _membershipService = membershipService;
         public async Task<bool> UpdateAsync(int id, Project project)
         {
+            var iAmAnAdminOfOrg = await _membershipService.IAmAdminOfOrgAsync(project.OrganizationId);
+            if (!iAmAnAdminOfOrg)
+                throw new UnauthorizedAccessException("User does not have permission to update this project.");
             project.Id = id;
             _repository.Attach(project);
 
@@ -32,7 +35,7 @@ namespace TaskFlow.Application.Services
         {
             var iAmAnAdminOfOrg = await _membershipService.IAmAdminOfOrgAsync(entity.OrganizationId);
             if (!iAmAnAdminOfOrg)
-                throw new UnauthorizedAccessException("User does not have access to delete this project.");
+                throw new UnauthorizedAccessException("User does not have permission to add this project.");
             _repository.Add(entity);
             var result = await _repository.SaveChangesAsync();
             return result;
@@ -42,14 +45,14 @@ namespace TaskFlow.Application.Services
             var project = await _repository.GetAsync(id) ?? throw new KeyNotFoundException("Project not found.");
             var iAmAnAdminOfOrg = await _membershipService.IAmAdminOfOrgAsync(project.OrganizationId);
             if (!iAmAnAdminOfOrg)
-                throw new UnauthorizedAccessException("User does not have access to delete this project.");
+                throw new UnauthorizedAccessException("User does not have permission to delete this project.");
             _repository.Remove(project);
             var result = await _repository.SaveChangesAsync();
             return result;
         }
         public async Task<IEnumerable<Project>> GetAllForOrgAsync(int id)
         {
-            _ = _membershipService.GetUserMembershipForOrgAsync(id)
+            _ = await _membershipService.GetUserMembershipForOrgAsync(id)
                 ?? throw new UnauthorizedAccessException("User does not have access to this organization.");
             return await _repository.GetAllByOrganizationIdAsync(id);
         }

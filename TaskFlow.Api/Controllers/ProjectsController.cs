@@ -63,7 +63,7 @@ namespace TaskFlow.Api.Controllers
                 return NoContent();
             return StatusCode(500);
         }
-        [HttpGet("organization/{id}")]
+        [HttpGet("organizations/{id}")]
         public async Task<ActionResult<IEnumerable<Project>>> GetForOrg(int id)
         {
             var result = await _projectService.GetAllForOrgAsync(id);

@@ -32,7 +32,7 @@ namespace TaskFlow.Application.Services
             userId ??= _userService.MyId;
             _cache.Remove(GetMembershipCacheKey(userId!));
         }
-        public async Task<bool> IAmAdminAndHasAccessToOrgAsync(int id)
+        public async Task<bool> IAmAdminOfOrgAsync(int id)
         {
             var memberships = await GetUserMembershipsAsync();
             return memberships.Any(m => m.OrganizationId == id && m.OrganizationRoles.Any(x => x.Role == OrgRole.Admin));

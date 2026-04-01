@@ -25,7 +25,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("{organizationId}")]
-        public async Task<ActionResult<MembershipResponse?>> GetUserMembershipForOrganization(int organizationId)
+        public async Task<ActionResult<MembershipResponse?>> GetMyMembershipForOrganization(int organizationId)
         {
             var result = await _service.GetUserMembershipForOrgAsync(organizationId);
             if (result == null)

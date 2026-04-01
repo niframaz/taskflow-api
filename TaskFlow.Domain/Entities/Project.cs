@@ -11,7 +11,6 @@ namespace TaskFlow.Domain.Entities
         public string? Description { get; set; }
         public required Organization Organization { get; set; }
         public int OrganizationId { get; set; }
-        public ICollection<ApplicationUser> Users { get; set; } = [];
         public ICollection<TaskItem> TaskItems { get; set; } = [];
     }
 }

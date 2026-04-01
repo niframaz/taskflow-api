@@ -42,7 +42,7 @@ namespace TaskFlow.Application.Services
 
         public async Task<bool> UpdateAsync(int id, Organization organization)
         {
-            if (await _membershipService.IAmAdminAndHasAccessToOrgAsync(id))
+            if (await _membershipService.IAmAdminOfOrgAsync(id))
             {
                 organization.Id = id;
                 _repository.Attach(organization);
@@ -53,7 +53,7 @@ namespace TaskFlow.Application.Services
         }
         public async override Task<bool> RemoveAsync(int id)
         {
-            if (await _membershipService.IAmAdminAndHasAccessToOrgAsync(id))
+            if (await _membershipService.IAmAdminOfOrgAsync(id))
             {
                 _userService.InvalidateMyCache();
                 return await base.RemoveAsync(id);                

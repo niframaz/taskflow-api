@@ -30,9 +30,9 @@ namespace TaskFlow.Application.Services
         }
         public override async Task<bool> AddAsync(Project entity)
         {
-            var userMemberships = await _membershipService.GetUserMembershipsAsync();
-            _ = userMemberships.FirstOrDefault(m => m.OrganizationId == entity.OrganizationId)
-                ?? throw new UnauthorizedAccessException("User does not have access to this organization.");
+            var iAmAnAdminOfOrg = await _membershipService.IAmAdminOfOrgAsync(entity.OrganizationId);
+            if (!iAmAnAdminOfOrg)
+                throw new UnauthorizedAccessException("User does not have access to delete this project.");
             _repository.Add(entity);
             var result = await _repository.SaveChangesAsync();
             return result;
@@ -40,7 +40,7 @@ namespace TaskFlow.Application.Services
         public override async Task<bool> RemoveAsync(int id)
         {
             var project = await _repository.GetAsync(id) ?? throw new KeyNotFoundException("Project not found.");
-            var iAmAnAdminOfOrg = await _membershipService.IAmAdminAndHasAccessToOrgAsync(project.OrganizationId);
+            var iAmAnAdminOfOrg = await _membershipService.IAmAdminOfOrgAsync(project.OrganizationId);
             if (!iAmAnAdminOfOrg)
                 throw new UnauthorizedAccessException("User does not have access to delete this project.");
             _repository.Remove(project);

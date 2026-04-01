@@ -18,10 +18,6 @@ namespace TaskFlow.Infrastructure.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<ApplicationUser>()
-                .HasMany(u => u.Projects)
-                .WithMany(p => p.Users);
-
-            modelBuilder.Entity<ApplicationUser>()
                 .HasMany(u => u.Memberships)
                 .WithOne(t => t.User)
                 .HasForeignKey(t => t.UserId)

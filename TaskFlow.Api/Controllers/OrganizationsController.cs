@@ -15,6 +15,7 @@ namespace TaskFlow.Api.Controllers
     public class OrganizationsController(IOrganizationService service, IMapper mapper) : ControllerBase
     {
         private readonly IOrganizationService _service = service;
+        //move mapper and DTOs from API to application layer
         private readonly IMapper _mapper = mapper;
 
         [HttpGet]

@@ -16,6 +16,7 @@ namespace TaskFlow.Api.Controllers
     public class UsersController(IUserService userService, IMapper mapper, ILogger<UsersController> logger) : ControllerBase
     {
         private readonly IUserService _userService = userService;
+        //move mapper and DTOs from API to application layer
         private readonly IMapper _mapper = mapper;
         private readonly ILogger<UsersController> _logger = logger;
         // GET: api/<UserController>

@@ -14,6 +14,7 @@ namespace TaskFlow.Api.Controllers
     public class TaskItemsController(ITaskService taskService, IMapper mapper) : ControllerBase
     {
         private readonly ITaskService _taskService = taskService;
+        //move mapper and DTOs from API to application layer
         private readonly IMapper _mapper = mapper;
 
         [HttpGet]

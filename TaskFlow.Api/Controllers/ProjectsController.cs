@@ -15,6 +15,7 @@ namespace TaskFlow.Api.Controllers
     public class ProjectsController(IProjectService projectService, IMapper mapper) : ControllerBase
     {
         private readonly IProjectService _projectService = projectService;
+        //move mapper and DTOs from API to application layer
         private readonly IMapper _mapper = mapper;
 
         [HttpGet]

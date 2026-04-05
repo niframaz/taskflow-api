@@ -14,6 +14,7 @@ namespace TaskFlow.Api.Controllers
     public class MembershipsController(IMembershipService service, IMapper mapper) : ControllerBase
     {
         private readonly IMembershipService _service = service;
+        //move mapper and DTOs from API to application layer
         private readonly IMapper _mapper = mapper;
 
         [HttpGet()]

@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
-using System.Security.Claims;
+﻿using Microsoft.Extensions.Caching.Memory;
 using TaskFlow.Application.Abstractions;
 using TaskFlow.Application.DTOs;
 using TaskFlow.Domain.Entities;
@@ -10,16 +7,16 @@ using TaskFlow.Domain.Enums;
 namespace TaskFlow.Application.Services
 {
     public class UserService(IUserRepository repository, IJwtService jwtService, IUnitOfWork unitOfWork,
-        IHttpContextAccessor httpContextAccessor, IMemoryCache cache, IJwtOptions jwtOptions) : IUserService
+        ICurrentUserContext currentUserContext, IMemoryCache cache, IJwtOptions jwtOptions) : IUserService
     {
         private readonly IUserRepository _repository = repository;
         private readonly IJwtService _jwtService = jwtService;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
-        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        private readonly ICurrentUserContext _currentUserContext = currentUserContext;
         private readonly IMemoryCache _cache = cache;
         private readonly IJwtOptions _jwtOptions = jwtOptions;
 
-        public string? MyId => _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        public string? MyId => _currentUserContext.UserId;
 
         public async Task<ApplicationUser> GetMeAsync()
         {

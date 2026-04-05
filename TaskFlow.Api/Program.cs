@@ -15,6 +15,7 @@ using TaskFlow.Api.Middleware;
 using TaskFlow.Application.Abstractions;
 using TaskFlow.Application.Services;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Infrastructure.Context;
 using TaskFlow.Infrastructure.Data;
 using TaskFlow.Infrastructure.Repository;
 using TaskFlow.Infrastructure.Security;
@@ -112,6 +113,7 @@ try
     builder.Services.AddScoped<IProjectService, ProjectService>();
     builder.Services.AddScoped<IOrganizationService, OrganizationService>();
     builder.Services.AddScoped<IMembershipService, MembershipService>();
+    builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
 
     builder.Services.AddScoped<IJwtService, JwtService>();
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

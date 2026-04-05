@@ -52,9 +52,10 @@ namespace TaskFlow.Application.Services
         }
         public async Task<bool> AddMembershipRoleAsync(int orgId, string userId, OrgRole role)
         {
-            var memberships = await GetUserMembershipsAsync(userId);
-            var member = memberships.FirstOrDefault(m => m.OrganizationId == orgId && m.OrganizationRoles.Any(x => x.Role == OrgRole.Admin))
-                ?? throw new UnauthorizedAccessException("User does not have access to edit this member.");
+            if(await IAmAdminOfOrgAsync(orgId))
+                throw new UnauthorizedAccessException("User does not have access to edit this member.");
+            var member = await GetUserMembershipForOrgAsync(orgId, userId) 
+                ?? throw new InvalidOperationException("User is not a member of this organization.");
             _repository.AddMembershipRoleAsync(member, role);
             InvalidateMembership(member.UserId);
             return await _repository.SaveChangesAsync();

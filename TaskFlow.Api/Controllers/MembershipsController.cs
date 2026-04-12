@@ -18,7 +18,7 @@ namespace TaskFlow.Api.Controllers
         private readonly IMapper _mapper = mapper;
 
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<MembershipResponse>>> GetUserMemberships()
+        public async Task<ActionResult<IEnumerable<MembershipResponse>>> GetMyMemberships()
         {
             var result = await _service.GetUserMembershipsAsync();
             var response = _mapper.Map<List<MembershipResponse>>(result);
@@ -41,10 +41,10 @@ namespace TaskFlow.Api.Controllers
             var response = _mapper.Map<List<MembershipResponse>>(result);
             return Ok(response);
         }
-        [HttpPost("roles")]
-        public async Task<ActionResult> AddMembershipRole(MembershipRequest request)
+        [HttpPost()]
+        public async Task<IActionResult> AddMembership(MembershipRequest request)
         {
-            var result = await _service.AddMembershipRoleAsync(request.OrganizationId, request.UserId, request.Role);
+            var result = await _service.AddMembershipAsync(request.OrganizationId, request.UserId, request.Role);
             if (!result)
                 return BadRequest();
             return CreatedAtAction(
@@ -53,5 +53,7 @@ namespace TaskFlow.Api.Controllers
                 request
             );
         }
+
+        //RemoveMembershipRole
     }
 }

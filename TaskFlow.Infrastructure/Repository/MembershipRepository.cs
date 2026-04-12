@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TaskFlow.Application.Abstractions;
 using TaskFlow.Domain.Entities;
-using TaskFlow.Domain.Enums;
 using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Repository
@@ -11,10 +10,9 @@ namespace TaskFlow.Infrastructure.Repository
         public async Task<List<Membership>> GetUserMembershipsAsync(string userId)
         {
             return await _dbSet
-                .AsNoTracking()
                 .Where(x => x.UserId == userId)
                 .Include(x => x.OrganizationRoles)
-                .Include(x => x.User)
+                .Include(x => x.Organization)
                 .ToListAsync();
         }
         public async Task<List<Membership>> GetOrganizationMembershipsAsync(int orgId)
@@ -33,20 +31,6 @@ namespace TaskFlow.Infrastructure.Repository
                 .Include(x => x.OrganizationRoles)
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.OrganizationId == organizationId && x.User.Email == email);
-        }
-        public void AddMembershipRoleAsync(Membership membership, OrgRole role)
-        {
-            //add costraint: prevent duplicate roles for the same membership
-            var existingRole = membership.OrganizationRoles.FirstOrDefault(r => r.Role == role);
-
-            if (existingRole != null)
-            {
-                return;
-            }
-            else
-            {
-                membership.OrganizationRoles.Add(new OrganizationRole { Role = role });
-            }
         }
     }
 }

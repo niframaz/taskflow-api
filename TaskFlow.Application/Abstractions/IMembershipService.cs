@@ -10,6 +10,6 @@ namespace TaskFlow.Application.Abstractions
         Task<bool> IAmAdminOfOrgAsync(int id);
         Task<Membership?> GetUserMembershipForOrgAsync(int organizationId, string? userId = null);
         Task<IEnumerable<Membership>> GetAllMembershipsForMyOrgAsync(int orgId);
-        Task<bool> AddMembershipRoleAsync(int orgId, string userId, OrgRole role);
+        Task<bool> AddMembershipAsync(int orgId, string userId, OrgRole role);
     }
 }

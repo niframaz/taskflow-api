@@ -17,16 +17,16 @@ namespace TaskFlow.Api.Controllers
         private readonly IMapper _mapper = mapper;
         private readonly ILogger<UsersController> _logger = logger;
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequest user)
+        public async Task<ActionResult<AuthResponseDto?>> Register(RegisterRequest user)
         {
             var appUser = _mapper.Map<ApplicationUser>(user);
-            var token = await _userService.RegisterAsync(appUser, user.Password);
-            if (token is not null)
+            var response = await _userService.RegisterAsync(appUser, user.Password);
+            if (response is not null)
             {
-                return Ok(new { token });
+                return Ok(response);
             }
             _logger.LogWarning("User registration failed for email: {Email}", user.Email);
-            return StatusCode(500);
+            return BadRequest(new { message = "Registration failed. Email may already be in use." });
         }
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto?>> Login(LoginRequest user)

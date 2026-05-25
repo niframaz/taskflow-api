@@ -7,7 +7,7 @@ namespace TaskFlow.Application.Abstractions
     public interface IUserService
     {
         public string? MyId { get; }
-        Task<string?> RegisterAsync(ApplicationUser user, string password);
+        Task<AuthResponseDto?> RegisterAsync(ApplicationUser user, string password);
         Task<AuthResponseDto?> LoginAsync(string email, string password);
         Task<bool> CreateRoleAsync(UserRole role);
         Task<bool> RemoveUserRoleAsync(string email, UserRole role);

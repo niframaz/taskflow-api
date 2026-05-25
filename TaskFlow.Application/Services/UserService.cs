@@ -49,7 +49,7 @@ namespace TaskFlow.Application.Services
         {
             _cache.Remove($"CurrentUser_{MyId}");
         }
-        public async Task<string?> RegisterAsync(ApplicationUser user, string password)
+        public async Task<AuthResponseDto?> RegisterAsync(ApplicationUser user, string password)
         {
             user.UserName = user.Email;
             try
@@ -70,7 +70,19 @@ namespace TaskFlow.Application.Services
                 throw;
             }
             var token = await _jwtService.GenerateToken(user);
-            return token;
+            var response = new AuthResponseDto
+            {
+                Token = token,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationInMinutes),
+                User = new UserDto
+                {
+                    Id = user.Id,
+                    Name = user.Name!,
+                    Email = user.Email!,
+                    Roles = await _repository.GetAllRolesForUserAsync(user)
+                }
+            };
+            return response;
         }
         public async Task<AuthResponseDto?> LoginAsync(string email, string password)
         {

@@ -142,7 +142,7 @@ namespace TaskFlow.Tests.Application
             var name = "New Org";
             var description = "Description";
 
-            _mockUserService.Setup(x => x.GetMeAsync()).ReturnsAsync((ApplicationUser?)null);
+            _mockUserService.Setup(x => x.GetMeAsync()).ReturnsAsync((ApplicationUser)null!);
 
             // Act
             var result = await _sut.CreateOrganizationAsync(name, description);

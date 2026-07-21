@@ -8,7 +8,7 @@ namespace TaskFlow.Domain.Specifications
             : base(t => t.Id == taskId)
         {
             AddInclude(t => t.Project);
-            AddInclude(t => t.User);
+            AddInclude(t => t.User!);
             AddInclude(t => t.Comments);
             AddInclude("Project.Organization");
             AddInclude("Comments.User");
@@ -18,7 +18,7 @@ namespace TaskFlow.Domain.Specifications
             : base()
         {
             AddInclude(t => t.Project);
-            AddInclude(t => t.User);
+            AddInclude(t => t.User!);
         }
     }
 }

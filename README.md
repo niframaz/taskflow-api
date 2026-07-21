@@ -24,7 +24,7 @@ TaskFlow enables collaborative project management with:
 ### Setup
 ```bash
 # Clone and restore
-git clone https://github.com/nifras/taskflow-api
+git clone https://github.com/niframaz/taskflow-api
 cd taskflow-api
 dotnet restore
 
@@ -76,7 +76,7 @@ POST /api/taskitems/{id}/assign       # Assign to user
 ### Clean Architecture Layers
 ```
 ┌─────────────────────────────────┐
-│   API Layer                      │  Controllers, Middleware, DTOs
+│   API Layer                      │  Controllers, Middleware
 ├─────────────────────────────────┤
 │   Application Layer              │  Services, Abstractions, DTOs
 ├─────────────────────────────────┤
@@ -171,11 +171,10 @@ dotnet test --verbosity normal
 - `appsettings.Development.json` - Development config
 - `appsettings.Production.json` - Production config
 
-## 📖 Documentation
+## 📖 API Documentation
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed architecture guide
-- **[TaskFlow.Tests/README.md](TaskFlow.Tests/README.md)** - Testing documentation
-- **Scalar UI** - Interactive API docs at `/scalar/v1`
+- **Scalar UI** - Interactive API docs at `https://localhost:7059/scalar/v1`
+- **OpenAPI/Swagger** - Standard OpenAPI 3.0 specification available
 
 ## 🚦 Production Checklist
 
@@ -238,7 +237,7 @@ MIT License
 ## 👤 Author
 
 **Mohamed Nifras**
-- GitHub: [@nifras](https://github.com/nifras)
+- GitHub: [@niframaz](https://github.com/niframaz)
 
 ---
 

@@ -203,8 +203,8 @@ try
         options.AddPolicy("AllowAngular", policy =>
         {
             policy.WithOrigins(corsSettings.AllowedOrigins)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
+                  .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                  .WithHeaders("Content-Type", "Authorization")
                   .AllowCredentials();
         });
     });
